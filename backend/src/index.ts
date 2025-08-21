@@ -2,7 +2,7 @@ import { ApolloServer } from "@apollo/server";
 import { startStandaloneServer } from "@apollo/server/standalone";
 
 // @ts-ignore
-import { issues, users, comments } from './data.ts'
+import {issues, users, comments, Issue, User} from './data.ts'
 
 const typeDefs = `
     type User {
@@ -45,6 +45,7 @@ const typeDefs = `
       issues(status: String, assignedTo: String): [Issue!]!
       issue(id: ID!): Issue!
       users: [User!]!
+      user(id: ID!): User!
     }
 `
 
@@ -52,14 +53,16 @@ const resolvers = {
     Query: {
         dummy: (): string => "Hello, GraphQL",
         issuesCount: (): Number => issues.length,
-        issues: (_, {status, assignedTo}) => {
-            return issues.filter(issue => (status === undefined || issue.status === status) && (assignedTo === undefined || issue.assignedTo === assignedTo))
+        issues: (_ :any, args:any):Issue[] => {
+            return issues.filter(issue => (args.status === undefined || issue.status === args.status) && (args.assignedTo === undefined || issue.assignedTo === args.assignedTo))
         },
-        issue: (_, args) => {
+        issue: (_:any, args:any): Issue | undefined => {
             return issues.find(issue => issue.id === args.id)
+        },
+        users: (): User[] => users,
+        user: (_: any, args: any) => {
+            return users.find(user => user.id === args.id)
         }
-        users: () => users,
-        user: (_, args) => users.find(user => user.id === args.id)
     },
 }
 
