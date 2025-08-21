@@ -81,11 +81,11 @@ const resolvers = {
     dummy: (): string => "Hello, GraphQL",
     issuesCount: (_: any, args: Issue): number => {
       if (!args.status) {
-        return issues.length
+        return issues.length;
       }
-      return issues.filter((issue: Issue) => issue.status === args.status).length
-
-    } ,
+      return issues.filter((issue: Issue) => issue.status === args.status)
+        .length;
+    },
     issues: (_: any, args: Issue): Issue[] => {
       return issues.filter(
         (issue: Issue) =>
@@ -95,7 +95,7 @@ const resolvers = {
       );
     },
     issue: (_: any, args: Issue): Issue | undefined => {
-      return issues.find((issue:Issue) => issue.id === args.id);
+      return issues.find((issue: Issue) => issue.id === args.id);
     },
     users: (): User[] => users,
     user: (_: any, args: User): User | undefined => {
@@ -103,12 +103,12 @@ const resolvers = {
     },
   },
   Issue: {
-    comments: (_:Issue): Comment[] => {
+    comments: (_: Issue): Comment[] => {
       // console.log(root)
       // return []
       return comments.filter((comment: Comment) => comment.issueId === _.id);
     },
-    assignedTo: (_:Issue): User | undefined => {
+    assignedTo: (_: Issue): User | undefined => {
       //console.log(_)
       return users.find((user: User) => user.id === _.assignedTo);
     },
@@ -119,18 +119,18 @@ const resolvers = {
       return users.find((user: User) => user.id === _.author);
     },
     issue: (_: Comment): Issue | undefined => {
-      return issues.find((issue:Issue) => issue.id === _.issueId)
-    }
+      return issues.find((issue: Issue) => issue.id === _.issueId);
+    },
   },
   User: {
-    assignedIssues: (_: User):Issue[] => {
+    assignedIssues: (_: User): Issue[] => {
       // console.log(_)
       return issues.filter((issue: Issue) => issue.assignedTo === _.id);
     },
   },
   Mutation: {
     // - createUser
-    createUser: (_: any, args: { name: string, email: string }): User => {
+    createUser: (_: any, args: { name: string; email: string }): User => {
       if (!args.name || !args.email) {
         throw new GraphQLError(`name and email are required`, {
           extensions: {
@@ -138,12 +138,15 @@ const resolvers = {
           },
         });
       }
-      const user = {...args, id: uuid()};
+      const user = { ...args, id: uuid() };
       users.push(user);
       return user;
     },
     // - createIssue
-    createIssue: (_: any, args: { title: string, description: string }): Issue => {
+    createIssue: (
+      _: any,
+      args: { title: string; description: string }
+    ): Issue => {
       if (!args.title || !args.description) {
         throw new GraphQLError(`title and description is required`, {
           extensions: {
@@ -167,68 +170,68 @@ const resolvers = {
     assignIssue: (_: any, args: any): Issue => {
       if (!args.id || !args.userId) {
         throw new GraphQLError(`id and userId is required`, {
-          extensions: {code: "BAD_USER_INPUT"},
+          extensions: { code: "BAD_USER_INPUT" },
         });
       }
       const user = users.find((user: User) => user.id === args.userId);
       if (!user) {
         throw new GraphQLError(`user not found`, {
-          extensions: {code: "NOT_FOUND"},
+          extensions: { code: "NOT_FOUND" },
         });
       }
       const issue = issues.find((issue: Issue) => issue.id === args.id);
       if (!issue) {
         throw new GraphQLError(`issue not found`, {
-          extensions: {code: "NOT_FOUND"},
+          extensions: { code: "NOT_FOUND" },
         });
       }
       issue.assignedTo = user.id;
       issue.status = "ASSIGNED";
-      issue.updatedAt = new Date().toISOString()
+      issue.updatedAt = new Date().toISOString();
       return issue;
     },
     // - updateIssueStatus
     updateIssueStatus: (_: any, args: any) => {
       if (!args.id || !args.status) {
         throw new GraphQLError(`id and status is required`, {
-          extensions: {code: "BAD_USER_INPUT"},
+          extensions: { code: "BAD_USER_INPUT" },
         });
       }
 
       const issue = issues.find((issue: Issue) => issue.id === args.id);
       if (!issue) {
         throw new GraphQLError(`issue not found`, {
-          extensions: {code: "NOT_FOUND"},
+          extensions: { code: "NOT_FOUND" },
         });
       }
 
       issue.status = args.status;
-      issue.updatedAt = new Date().toISOString()
+      issue.updatedAt = new Date().toISOString();
       return issue;
     },
     // - addComment
     addComment: (_: any, args: any): Comment => {
       if (!args.issueId || !args.content) {
         throw new GraphQLError(`issueId and content is required`, {
-          extensions: {code: "BAD_USER_INPUT"},
+          extensions: { code: "BAD_USER_INPUT" },
         });
       }
       if (!args.author) {
         throw new GraphQLError(`user is required`, {
-          extensions: {code: "BAD_USER_INPUT"},
+          extensions: { code: "BAD_USER_INPUT" },
         });
       }
 
       const user = users.find((user: User) => user.id === args.author);
       if (!user) {
         throw new GraphQLError(`user not found`, {
-          extensions: {code: "NOT_FOUND"},
+          extensions: { code: "NOT_FOUND" },
         });
       }
       const issue = issues.find((issue: Issue) => issue.id === args.issueId);
       if (!issue) {
         throw new GraphQLError(`issue not found`, {
-          extensions: {code: "NOT_FOUND"},
+          extensions: { code: "NOT_FOUND" },
         });
       }
 
@@ -236,7 +239,7 @@ const resolvers = {
         id: uuid(),
         createdAt: new Date().toISOString(),
         author: args.author,
-          issueId: args.issueId,
+        issueId: args.issueId,
         content: args.content,
       };
 
