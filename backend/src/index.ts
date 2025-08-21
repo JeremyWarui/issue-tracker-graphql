@@ -1,8 +1,11 @@
 import { ApolloServer } from "@apollo/server";
 import { startStandaloneServer } from "@apollo/server/standalone";
 
+
+import type { Issue, Comment, User } from "./types.ts";
 // @ts-ignore
-import {issues, users, comments, Issue, User} from './data.ts'
+import {issues, users, comments } from './data.ts'
+
 
 const typeDefs = `
     type User {
@@ -64,6 +67,30 @@ const resolvers = {
             return users.find(user => user.id === args.id)
         }
     },
+    Issue: {
+        comments: (_ :any):Comment[] => {
+            // console.log(root)
+            // return []
+            return comments.filter(comment => comment.issue === _.id)
+        },
+        assignedTo: (_ :any) => {
+            //console.log(_)
+            return users.find(user => user.id === _.assignedTo)
+        }
+    },
+    Comment: {
+        author: (_: any, args: any) => {
+            // console.log(_)
+            return users.find(user => user.id === _.authorId)
+        }
+    },
+    User: {
+        assignedIssues: (_: any, args: any) => {
+            // console.log(_)
+            return issues.filter((issue: Issue) => issue.assignedTo === _.id)
+        }
+    }
+
 }
 
 const server = new ApolloServer({
