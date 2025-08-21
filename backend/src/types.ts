@@ -21,7 +21,7 @@ export interface Issue {
 export interface Comment {
     id: string;
     content: string;
-    issue: string;
-    authorId: string;
+    issueId: string;
+    author: string;
     createdAt: string;
 }
