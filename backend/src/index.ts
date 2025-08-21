@@ -1,10 +1,12 @@
 import { ApolloServer } from "@apollo/server";
 import { startStandaloneServer } from "@apollo/server/standalone";
+import { v1 as uuid } from "uuid";
 
 
 import type { Issue, Comment, User } from "./types.ts";
 // @ts-ignore
 import {issues, users, comments } from './data.ts'
+import {GraphQLError} from "graphql/error";
 
 
 const typeDefs = `
@@ -50,6 +52,30 @@ const typeDefs = `
       users: [User!]!
       user(id: ID!): User!
     }
+    
+    type Mutation {
+        createUser(
+          name: String!
+          email: String!
+        ): User!
+        createIssue(
+          title: String!
+          description: String!
+        ): Issue!
+        updateIssueStatus(
+          id: ID!
+          status: IssueStatus!
+        ): Issue!
+        assignIssue(
+          id: ID!
+          userId: String!
+        ): Issue!
+        addComment(
+            content: String!
+            user: String!
+            issue: String!
+        ): Comment!
+    }
 `
 
 const resolvers = {
@@ -88,6 +114,120 @@ const resolvers = {
         assignedIssues: (_: any, args: any) => {
             // console.log(_)
             return issues.filter((issue: Issue) => issue.assignedTo === _.id)
+        }
+    },
+    Mutation: {
+        // - createUser
+        createUser:(_: any, args: any):User => {
+
+            if (!args.name || !args.email) {
+                throw new GraphQLError(`name and email are required`, {
+                    extensions: {
+                        code: "BAD_USER_INPUT"
+                    }
+                });
+            }
+            const user = {...args, id: uuid() };
+            users.push(user);
+            return user;
+        },
+        // - createIssue
+        createIssue: (_: any, args: any) :Issue => {
+            if (!args.title || !args.description) {
+                throw new GraphQLError(`title and description is required`, {
+                    extensions: {
+                        code: "BAD_USER_INPUT"
+                    }
+                })
+            }
+
+            const issue = {
+                id: uuid(),
+                ...args,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                assignedTo: null,
+                status: "OPEN"
+            };
+            issues.push(issue);
+            return issue;
+        },
+        // - assignIssue
+        assignIssue: (_: any, args: any) => {
+            if (!args.id || !args.userId) {
+                throw new GraphQLError(`id and userId is required`, {
+                    extensions: { code: "BAD_USER_INPUT" }
+                })
+            }
+            const user = users.find(user => user.id === args.userId);
+            if (!user) {
+                throw new GraphQLError(`user not found`, {
+                    extensions: { code: "NOT_FOUND" }
+                })
+            }
+            const issue = issues.find(issue => issue.id === args.id);
+            if (!issue) {
+                throw new GraphQLError(`issue not found`, {
+                    extensions: { code: "NOT_FOUND" }
+                })
+            }
+            issue.assignedTo = user.id
+            return issue;
+        },
+        // - updateIssueStatus
+        updateIssueStatus: (_: any, args: any) => {
+            if (!args.id || !args.status) {
+                throw new GraphQLError(`id and status is required`, {
+                    extensions: { code: "BAD_USER_INPUT" }
+                })
+            }
+
+            const issue = issues.find(issue => issue.id === args.id);
+            if (!issue) {
+                throw new GraphQLError(`issue not found`, {
+                    extensions: { code: "NOT_FOUND" }
+                })
+            }
+
+            issue.status = args.status;
+            return issue;
+        },
+        // - addComment
+        addComment: (_: any, args: any): Comment => {
+            if (!args.id || !args.content) {
+                throw new GraphQLError(`id and content is required`, {
+                    extensions: { code: "BAD_USER_INPUT" }
+                })
+            }
+            if (!args.user) {
+                throw new GraphQLError(`user is required`, {
+                    extensions: { code: "BAD_USER_INPUT" }
+                })
+            }
+
+            const user = users.find(user => user.id === args.user);
+            if (!user) {
+                throw new GraphQLError(`user not found`, {
+                    extensions: { code: "NOT_FOUND" }
+                })
+            }
+            const issue = issues.find(issue => issue.id === args.id);
+            if (!issue) {
+                throw new GraphQLError(`issue not found`, {
+                    extensions: { code: "NOT_FOUND" }
+                })
+            }
+
+            const comment = {
+                id: uuid(),
+                createdAt: new Date().toISOString(),
+                authorId: user.id,
+                issue: issue.id,
+                content: args.content,
+            }
+
+            comments.push(comment);
+            return comment;
         }
     }
 
