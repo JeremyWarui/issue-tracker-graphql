@@ -1,9 +1,13 @@
+import { Sidebar } from "@/components/ui/sidebar.tsx";
+
 function App() {
 
   return (
     <>
-      <h1>Hello from GraphQL 🚀 </h1>
+     <h1>Hello, GraphQL</h1>
+        <Sidebar />
     </>
+
   )
 }
 
