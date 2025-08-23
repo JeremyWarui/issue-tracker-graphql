@@ -79,10 +79,10 @@ export function Dashboard() {
                 <CardContent className="py-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <AlertCircle className="h-5 w-5 text-red-500" />
-                      <div className="text-sm text-muted-foreground">Open</div>
+                      <AlertCircle className="h-7 w-7 text-red-500" />
+                      <div className="text-lg font-bold text-muted-foreground">Open</div>
                     </div>
-                    <div className="text-2xl font-bold">{mockStats.open}</div>
+                    <div className="text-3xl font-bold">{mockStats.open}</div>
                   </div>
                 </CardContent>
               </Card>
@@ -90,12 +90,12 @@ export function Dashboard() {
                 <CardContent className="py-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <Clock className="h-5 w-5 text-blue-500" />
-                      <div className="text-sm text-muted-foreground">
+                      <Clock className="h-7 w-7 text-blue-500" />
+                      <div className="text-lg font-bold text-muted-foreground">
                         In Progress
                       </div>
                     </div>
-                    <div className="text-2xl font-bold">
+                    <div className="text-3xl font-bold">
                       {mockStats.inProgress}
                     </div>
                   </div>
@@ -105,12 +105,12 @@ export function Dashboard() {
                 <CardContent className="py-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <CheckCircle className="h-5 w-5 text-green-500" />
-                      <div className="text-sm text-muted-foreground">
+                      <CheckCircle className="h-7 w-7 text-green-500" />
+                      <div className="text-lg font-bold text-muted-foreground">
                         Resolved
                       </div>
                     </div>
-                    <div className="text-2xl font-bold">
+                    <div className="text-3xl font-bold">
                       {mockStats.resolved}
                     </div>
                   </div>
@@ -120,12 +120,12 @@ export function Dashboard() {
                 <CardContent className="py-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <XCircle className="h-5 w-5 text-gray-500" />
-                      <div className="text-sm text-muted-foreground">
+                      <XCircle className="h-7 w-7 text-gray-500" />
+                      <div className="text-lg font-bold text-muted-foreground">
                         Closed
                       </div>
                     </div>
-                    <div className="text-2xl font-bold">{mockStats.closed}</div>
+                    <div className="text-3xl font-bold">{mockStats.closed}</div>
                   </div>
                 </CardContent>
               </Card>

@@ -98,7 +98,7 @@ export function IssuesList() {
           <Card className="bg-white">
             <CardHeader>
               <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
-                <CardTitle className="text-lg">Issue Management</CardTitle>
+                <CardTitle className="text-2xl">Issue Management</CardTitle>
                 <Button
                   onClick={() => setIsCreateModalOpen(true)}
                   className="w-fit bg-blue-600 hover:bg-blue-700"
@@ -163,7 +163,7 @@ export function IssuesList() {
 
           <Card className="bg-white">
             <CardHeader>
-              <CardTitle className="text-base">
+              <CardTitle className="text-2xl">
                 Issues ({filteredIssues.length})
               </CardTitle>
             </CardHeader>
@@ -237,57 +237,6 @@ export function IssuesList() {
               )}
             </CardContent>
           </Card>
-
-          <div className="grid gap-4 md:grid-cols-4">
-            <Card className="bg-white">
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-secondary">
-                    {filteredIssues.filter((i) => i.status === "open").length}
-                  </div>
-                  <div className="text-sm text-muted-foreground">Open</div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="bg-white">
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">
-                    {
-                      filteredIssues.filter((i) => i.status === "in-progress")
-                        .length
-                    }
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    In Progress
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="bg-white">
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-accent">
-                    {
-                      filteredIssues.filter((i) => i.status === "resolved")
-                        .length
-                    }
-                  </div>
-                  <div className="text-sm text-muted-foreground">Resolved</div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="bg-white">
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-muted-foreground">
-                    {filteredIssues.filter((i) => i.status === "closed").length}
-                  </div>
-                  <div className="text-sm text-muted-foreground">Closed</div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
         </div>
       </main>
 
