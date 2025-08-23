@@ -1,12 +1,22 @@
-// import { Sidebar } from "@/components/ui/sidebar.tsx";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
+import { Dashboard } from "./components/DashboardPage"
+import { IssuesList } from "./components/IssuesList"
+import { IssueDetail } from "./components/IssueDetail"
+import { UsersList } from "./components/UsersList"
+import "./App.css"
 
 function App() {
-
   return (
-    <>
-     <h1>Hello, GraphQL</h1>
-    </>
-
+    <Router>
+      <div className="App">
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/issues" element={<IssuesList />} />
+          <Route path="/issues/:id" element={<IssueDetail />} />
+          <Route path="/users" element={<UsersList />} />
+        </Routes>
+      </div>
+    </Router>
   )
 }
 
