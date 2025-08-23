@@ -10,8 +10,8 @@ export interface Issue {
     title: string
     description: string
     status: IssueStatus
-    assigneeId?: string
-    assignee?: User
+    // assigneeId?: string
+    assignedTo?: User
     createdAt: Date
     updatedAt: Date
     comments: Comment[]
@@ -20,13 +20,13 @@ export interface Issue {
 export interface Comment {
     id: string
     content: string
-    authorId: string
+    // authorId: string
     author: User
     issueId: string
     createdAt: Date
 }
 
-export type IssueStatus = "open" | "in-progress" | "closed" | "resolved"
+export type IssueStatus = "OPEN" | "IN_PROGRESS" | "CLOSED" | "RESOLVED"
 
 export interface DashboardStats {
     total: number
