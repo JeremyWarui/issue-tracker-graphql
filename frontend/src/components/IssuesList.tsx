@@ -144,9 +144,8 @@ export function IssuesList() {
                   <SelectContent>
                     <SelectItem value="all">All Assignees</SelectItem>
                     <SelectItem value="unassigned">Unassigned</SelectItem>
-                    
-                    { /*update the users*/ }
 
+                    {/*update the users*/}
 
                     {mockUsers.map((user) => (
                       <SelectItem key={user.id} value={user.id}>

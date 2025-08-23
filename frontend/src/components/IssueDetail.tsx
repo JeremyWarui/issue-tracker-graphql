@@ -29,10 +29,10 @@ import {
 import { formatDistanceToNow, format } from "date-fns";
 
 const statusOptions: { value: IssueStatus; label: string; color: string }[] = [
-  { value: "open", label: "Open", color: "secondary" },
-  { value: "in-progress", label: "In Progress", color: "default" },
-  { value: "resolved", label: "Resolved", color: "outline" },
-  { value: "closed", label: "Closed", color: "outline" },
+  { value: "OPEN", label: "Open", color: "secondary" },
+  { value: "IN_PROGRESS", label: "In Progress", color: "default" },
+  { value: "RESOLVED", label: "Resolved", color: "outline" },
+  { value: "CLOSED", label: "Closed", color: "outline" },
 ];
 
 function getStatusBadgeVariant(status: IssueStatus) {
@@ -49,9 +49,9 @@ export function IssueDetail() {
   const issue = mockIssues.find((i) => i.id === issueId);
 
   // State for editing
-  const [status, setStatus] = useState<IssueStatus>(issue?.status || "open");
+  const [status, setStatus] = useState<IssueStatus>(issue?.status || "OPEN");
   const [assigneeId, setAssigneeId] = useState<string>(
-    issue?.assigneeId || "unassigned"
+    issue?.assignedTo?.id || "unassigned"
   );
   const [newComment, setNewComment] = useState("");
   const [comments, setComments] = useState(issue?.comments || []);
