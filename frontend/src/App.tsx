@@ -1,9 +1,9 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
-import { Dashboard } from "./components/DashboardPage"
-import { IssuesList } from "./components/IssuesList"
-import { IssueDetail } from "./components/IssueDetail"
-import { UsersList } from "./components/UsersList"
-import "./App.css"
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Dashboard } from "./components/DashboardPage";
+import { IssuesList } from "./components/IssuesList";
+import { IssueDetail } from "./components/IssueDetail";
+import { UsersList } from "./components/UsersList";
+import "./App.css";
 
 function App() {
   return (
@@ -17,7 +17,7 @@ function App() {
         </Routes>
       </div>
     </Router>
-  )
+  );
 }
 
-export default App
+export default App;

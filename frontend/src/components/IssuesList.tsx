@@ -15,28 +15,32 @@ import {
 } from "@/components/ui/select";
 import { Navigation } from "./NavigationBar";
 import { IssueModal } from "./IssueModal";
-import { mockIssues, mockUsers } from "../lib/mock-data";
+import { mockUsers } from "../lib/mock-data";
 import type { IssueStatus, Issue } from "../lib/types";
 import { Search, Plus, Eye, Edit, User } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
+// use data from GraphQL
+import { useQuery } from "@apollo/client/react";
+import { ALL_ISSUES } from "@/lib/queries.ts";
+
 const statusOptions: { value: IssueStatus | "all"; label: string }[] = [
   { value: "all", label: "All Status" },
-  { value: "open", label: "Open" },
-  { value: "in-progress", label: "In Progress" },
-  { value: "resolved", label: "Resolved" },
-  { value: "closed", label: "Closed" },
+  { value: "OPEN", label: "Open" },
+  { value: "IN_PROGRESS", label: "In Progress" },
+  { value: "RESOLVED", label: "Resolved" },
+  { value: "CLOSED", label: "Closed" },
 ];
 
 function getStatusBadgeColor(status: IssueStatus) {
   switch (status) {
-    case "open":
+    case "OPEN":
       return "text-red-700 bg-red-100 border-red-200";
-    case "in-progress":
+    case "IN_PROGRESS":
       return "text-blue-700 bg-blue-100 border-blue-200";
-    case "resolved":
+    case "RESOLVED":
       return "text-green-700 bg-green-100 border-green-200";
-    case "closed":
+    case "CLOSED":
       return "text-gray-700 bg-gray-100 border-gray-200";
     default:
       return "";
@@ -51,7 +55,17 @@ export function IssuesList() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingIssue, setEditingIssue] = useState<Issue | null>(null);
 
-  const filteredIssues = mockIssues.filter((issue) => {
+  const { loading, error, data } = useQuery(ALL_ISSUES);
+  if (loading) return "loading...";
+  if (error) return `Error! ${error.message}`;
+
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
+  const { issues } = data;
+
+  console.log("issues: ", issues);
+
+  const filteredIssues = issues.filter((issue: Issue) => {
     const matchesSearch =
       issue.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       issue.description.toLowerCase().includes(searchQuery.toLowerCase());
@@ -59,8 +73,8 @@ export function IssuesList() {
       statusFilter === "all" || issue.status === statusFilter;
     const matchesAssignee =
       assigneeFilter === "all" ||
-      (assigneeFilter === "unassigned" && !issue.assignee) ||
-      (issue.assignee && issue.assignee.id === assigneeFilter);
+      (assigneeFilter === "unassigned" && !issue.assignedTo) ||
+      (issue.assignedTo && issue.assignedTo.id === assigneeFilter);
     return matchesSearch && matchesStatus && matchesAssignee;
   });
 
@@ -130,6 +144,10 @@ export function IssuesList() {
                   <SelectContent>
                     <SelectItem value="all">All Assignees</SelectItem>
                     <SelectItem value="unassigned">Unassigned</SelectItem>
+                    
+                    { /*update the users*/ }
+
+
                     {mockUsers.map((user) => (
                       <SelectItem key={user.id} value={user.id}>
                         {user.name}
@@ -176,7 +194,7 @@ export function IssuesList() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {filteredIssues.map((issue) => (
+                  {filteredIssues.map((issue: Issue) => (
                     <div
                       key={issue.id}
                       className="flex items-center justify-between p-4 border rounded-lg bg-slate-50 hover:bg-white transition-colors"
@@ -198,8 +216,8 @@ export function IssuesList() {
                           <div className="flex items-center space-x-1">
                             <User className="h-3 w-3" />
                             <span>
-                              {issue.assignee
-                                ? issue.assignee.name
+                              {issue.assignedTo
+                                ? issue.assignedTo.name
                                 : "Unassigned"}
                             </span>
                           </div>
