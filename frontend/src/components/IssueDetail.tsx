@@ -17,7 +17,7 @@ import {
 import { Navigation } from "./NavigationBar";
 import { IssueModal } from "./IssueModal";
 import { mockIssues, mockUsers } from "../lib/mock-data";
-import type { IssueStatus, Comment, Issue } from "../lib/types";
+import type { IssueStatus, Comment, Issue, User as UserType } from "../lib/types";
 import {
   ArrowLeft,
   User,
@@ -27,6 +27,8 @@ import {
   Edit,
 } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
+import {useQuery} from "@apollo/client/react";
+import {ALL_ISSUES_AND_USERS, GET_ISSUE} from "@/lib/queries.ts";
 
 const statusOptions: { value: IssueStatus; label: string; color: string }[] = [
   { value: "OPEN", label: "Open", color: "secondary" },
@@ -41,21 +43,31 @@ function getStatusBadgeVariant(status: IssueStatus) {
 }
 
 export function IssueDetail() {
-  const params = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
-  const issueId = params.id as string;
-
+  console.log("id: ", id)
   // Find the issue by ID
-  const issue = mockIssues.find((i) => i.id === issueId);
+  const { loading, error, data } = useQuery(GET_ISSUE, {
+    variables: { id }
+  });
+  if (loading) return "loading...";
+  if (error) return `Error! ${error.message}`;
+
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
+  const { issue , users } = data;
+  console.log("issue Fetched: ", issue);
+  console.log("users in list: ", users)
+
 
   // State for editing
-  const [status, setStatus] = useState<IssueStatus>(issue?.status || "OPEN");
-  const [assigneeId, setAssigneeId] = useState<string>(
-    issue?.assignedTo?.id || "unassigned"
-  );
-  const [newComment, setNewComment] = useState("");
-  const [comments, setComments] = useState(issue?.comments || []);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  // const [status, setStatus] = useState<IssueStatus>(issue?.status || "OPEN");
+  // const [assigneeId, setAssigneeId] = useState<string>(
+  //   issue?.assignedTo?.id || "unassigned"
+  // );
+  // const [newComment, setNewComment] = useState("");
+  // const [comments, setComments] = useState(issue?.comments || []);
+  // const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const handleBack = () => {
     navigate("/issues");
@@ -96,7 +108,7 @@ export function IssueDetail() {
     const comment: Comment = {
       id: Date.now().toString(),
       content: newComment,
-      authorId: "1", // Mock current user
+      // authorId: "1", // Mock current user
       author: mockUsers[0], // Mock current user
       issueId: issue.id,
       createdAt: new Date(),
@@ -112,7 +124,7 @@ export function IssueDetail() {
     // For now, just log the data
   };
 
-  const assignedUser = mockUsers.find((user) => user.id === assigneeId);
+  const assignedUser = users.find((user: UserType) => user.id === issue.assignedTo);
 
   return (
     <div className="min-h-screen bg-slate-100">
@@ -199,20 +211,20 @@ export function IssueDetail() {
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <MessageSquare className="h-4 w-4" />
-                  <span>Comments ({comments.length})</span>
+                  <span>Comments ({issue.comments.length})</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {/* Existing Comments */}
-                  {comments.map((comment) => (
+                  {issue.comments.map((comment: Comment) => (
                     <div
                       key={comment.id}
                       className="border-l-2 border-border pl-4 py-2"
                     >
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center space-x-2">
-                          <span className="font-medium text-sm">
+                          <span className="font-medium text-md">
                             {comment.author.name}
                           </span>
                           <span className="text-xs text-muted-foreground">
@@ -228,31 +240,31 @@ export function IssueDetail() {
                     </div>
                   ))}
 
-                  {comments.length === 0 && (
+                  {issue.comments.length === 0 && (
                     <p className="text-muted-foreground text-sm">
                       No comments yet. Be the first to comment!
                     </p>
                   )}
 
                   {/* Add Comment */}
-                  <div className="border-t pt-4">
-                    <div className="space-y-3">
-                      <Textarea
-                        placeholder="Add a comment..."
-                        value={newComment}
-                        onChange={(e) => setNewComment(e.target.value)}
-                        rows={3}
-                      />
-                      <Button
-                        onClick={handleAddComment}
-                        disabled={!newComment.trim()}
-                        className="bg-blue-600 hover:bg-blue-700"
-                      >
-                        <Send className="h-4 w-4 mr-2" />
-                        Add Comment
-                      </Button>
-                    </div>
-                  </div>
+                  {/*<div className="border-t pt-4">*/}
+                  {/*  <div className="space-y-3">*/}
+                  {/*    <Textarea*/}
+                  {/*      placeholder="Add a comment..."*/}
+                  {/*      value={newComment}*/}
+                  {/*      onChange={(e) => setNewComment(e.target.value)}*/}
+                  {/*      rows={3}*/}
+                  {/*    />*/}
+                  {/*    <Button*/}
+                  {/*      onClick={handleAddComment}*/}
+                  {/*      disabled={!newComment.trim()}*/}
+                  {/*      className="bg-blue-600 hover:bg-blue-700"*/}
+                  {/*    >*/}
+                  {/*      <Send className="h-4 w-4 mr-2" />*/}
+                  {/*      Add Comment*/}
+                  {/*    </Button>*/}
+                  {/*  </div>*/}
+                  {/*</div>*/}
                 </div>
               </CardContent>
             </Card>
@@ -287,22 +299,22 @@ export function IssueDetail() {
                 </div>
 
                 {/* Assignee Selector */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Assignee</label>
-                  <Select value={assigneeId} onValueChange={setAssigneeId}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select assignee" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="unassigned">Unassigned</SelectItem>
-                      {mockUsers.map((user) => (
-                        <SelectItem key={user.id} value={user.id}>
-                          {user.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                {/*<div className="space-y-2">*/}
+                {/*  <label className="text-sm font-medium">Assignee</label>*/}
+                {/*  <Select value={assigneeId} onValueChange={setAssigneeId}>*/}
+                {/*    <SelectTrigger>*/}
+                {/*      <SelectValue placeholder="Select assignee" />*/}
+                {/*    </SelectTrigger>*/}
+                {/*    <SelectContent>*/}
+                {/*      <SelectItem value="unassigned">Unassigned</SelectItem>*/}
+                {/*      {mockUsers.map((user) => (*/}
+                {/*        <SelectItem key={user.id} value={user.id}>*/}
+                {/*          {user.name}*/}
+                {/*        </SelectItem>*/}
+                {/*      ))}*/}
+                {/*    </SelectContent>*/}
+                {/*  </Select>*/}
+                {/*</div>*/}
 
                 <Button className="w-full bg-blue-600 hover:bg-blue-700">
                   Save Changes
@@ -336,7 +348,7 @@ export function IssueDetail() {
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Comments:</span>
-                  <span>{comments.length}</span>
+                  <span>{issue.comments.length}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Created:</span>
@@ -353,12 +365,12 @@ export function IssueDetail() {
       </main>
 
       {/* Edit Modal */}
-      <IssueModal
-        open={isEditModalOpen}
-        onOpenChange={setIsEditModalOpen}
-        issue={issue}
-        onSave={handleEditIssue}
-      />
+      {/*<IssueModal*/}
+      {/*  open={isEditModalOpen}*/}
+      {/*  onOpenChange={setIsEditModalOpen}*/}
+      {/*  issue={issue}*/}
+      {/*  onSave={handleEditIssue}*/}
+      {/*/>*/}
     </div>
   );
 }

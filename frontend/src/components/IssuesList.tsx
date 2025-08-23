@@ -15,14 +15,14 @@ import {
 } from "@/components/ui/select";
 import { Navigation } from "./NavigationBar";
 import { IssueModal } from "./IssueModal";
-import { mockUsers } from "../lib/mock-data";
-import type { IssueStatus, Issue } from "../lib/types";
+// import { mockUsers } from "../lib/mock-data";
+import type { IssueStatus, Issue, User as UserType  } from "../lib/types";
 import { Search, Plus, Eye, Edit, User } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 // use data from GraphQL
 import { useQuery } from "@apollo/client/react";
-import { ALL_ISSUES } from "@/lib/queries.ts";
+import { ALL_ISSUES_AND_USERS } from "@/lib/queries.ts";
 
 const statusOptions: { value: IssueStatus | "all"; label: string }[] = [
   { value: "all", label: "All Status" },
@@ -55,15 +55,15 @@ export function IssuesList() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingIssue, setEditingIssue] = useState<Issue | null>(null);
 
-  const { loading, error, data } = useQuery(ALL_ISSUES);
+  const { loading, error, data } = useQuery(ALL_ISSUES_AND_USERS);
   if (loading) return "loading...";
   if (error) return `Error! ${error.message}`;
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
-  const { issues } = data;
-
-  console.log("issues: ", issues);
+  const { issues , users } = data;
+  console.log("issues in list: ", issues);
+  console.log("users in list: ", users)
 
   const filteredIssues = issues.filter((issue: Issue) => {
     const matchesSearch =
@@ -147,7 +147,7 @@ export function IssuesList() {
 
                     {/*update the users*/}
 
-                    {mockUsers.map((user) => (
+                    {users.map((user: UserType) => (
                       <SelectItem key={user.id} value={user.id}>
                         {user.name}
                       </SelectItem>
@@ -195,7 +195,7 @@ export function IssuesList() {
                 <div className="space-y-3">
                   {filteredIssues.map((issue: Issue) => (
                     <div
-                      key={issue.id}
+                      key={issue.title}
                       className="flex items-center justify-between p-4 border rounded-lg bg-slate-50 hover:bg-white transition-colors"
                     >
                       <div className="flex-1 min-w-0">

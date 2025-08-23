@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { mockUsers } from "@/lib/mock-data";
-import type { Issue, IssueStatus } from "@/lib/types";
+import type {Issue, IssueStatus, User} from "@/lib/types";
 
 interface IssueModalProps {
   open: boolean;
@@ -30,10 +30,10 @@ interface IssueModalProps {
 }
 
 const statusOptions: { value: IssueStatus; label: string }[] = [
-  { value: "open", label: "Open" },
-  { value: "in-progress", label: "In Progress" },
-  { value: "resolved", label: "Resolved" },
-  { value: "closed", label: "Closed" },
+  { value: "OPEN", label: "Open" },
+  { value: "IN_PROGRESS", label: "In Progress" },
+  { value: "RESOLVED", label: "Resolved" },
+  { value: "CLOSED", label: "Closed" },
 ];
 
 export function IssueModal({
@@ -44,8 +44,8 @@ export function IssueModal({
 }: IssueModalProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [status, setStatus] = useState<IssueStatus>("open");
-  const [assigneeId, setAssigneeId] = useState<string>("unassigned");
+  const [status, setStatus] = useState<IssueStatus>("OPEN");
+  const [assigneeId, setAssigneeId] = useState<User>();
   const [isLoading, setIsLoading] = useState(false);
 
   const isEditing = !!issue;
@@ -58,13 +58,11 @@ export function IssueModal({
         setTitle(issue.title);
         setDescription(issue.description);
         setStatus(issue.status);
-        setAssigneeId(issue.assigneeId || "unassigned");
+        setAssigneeId(issue.assignedTo);
       } else {
         // Creating new issue
         setTitle("");
         setDescription("");
-        setStatus("open");
-        setAssigneeId("unassigned");
       }
     }
   }, [open, issue]);
@@ -80,7 +78,7 @@ export function IssueModal({
       title: title.trim(),
       description: description.trim(),
       status,
-      assigneeId: assigneeId === "unassigned" ? undefined : assigneeId,
+      // assigneeId: assigneeId === "unassigned" ? undefined : assigneeId,
     };
 
     if (isEditing && issue) {

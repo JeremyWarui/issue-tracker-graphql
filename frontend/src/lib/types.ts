@@ -23,7 +23,7 @@ export interface Comment {
     // authorId: string
     author: User
     issueId: string
-    createdAt: Date
+    createdAt: string
 }
 
 export type IssueStatus = "OPEN" | "IN_PROGRESS" | "CLOSED" | "RESOLVED"

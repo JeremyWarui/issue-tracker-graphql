@@ -12,7 +12,7 @@ import {
 
 // use data from GraphQL
 import { useQuery } from "@apollo/client/react";
-import { ALL_ISSUES } from "@/lib/queries.ts";
+import { ALL_ISSUES_AND_USERS } from "@/lib/queries.ts";
 import type { Issue } from "@/lib/types.ts";
 
 function getStatusIcon(status: string) {
@@ -50,7 +50,7 @@ function getStatusBadgeColor(status: string) {
 }
 
 export function Dashboard() {
-  const { loading, error, data } = useQuery(ALL_ISSUES);
+  const { loading, error, data } = useQuery(ALL_ISSUES_AND_USERS);
   if (loading) return "loading...";
   if (error) return `Error! ${error.message}`;
 
