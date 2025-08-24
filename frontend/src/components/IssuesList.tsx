@@ -27,7 +27,7 @@ import {
   ALL_ISSUES_AND_USERS,
   ASSIGN_ISSUE,
   CREATE_ISSUE,
-  UPDATE_ISSUE_STATUS
+  UPDATE_ISSUE_STATUS,
 } from "@/lib/queries.ts";
 // create issue or update issue
 
@@ -41,17 +41,17 @@ export function IssuesList() {
 
   const { loading, error, data } = useQuery(ALL_ISSUES_AND_USERS);
   // create issue
-  const [ createIssue ] = useMutation( CREATE_ISSUE, {
-    refetchQueries: [ { query: ALL_ISSUES_AND_USERS } ]
-  } )
+  const [createIssue] = useMutation(CREATE_ISSUE, {
+    refetchQueries: [{ query: ALL_ISSUES_AND_USERS }],
+  });
   // assign issue
-  const [ assignIssue ] = useMutation( ASSIGN_ISSUE, {
-    refetchQueries: [ { query: ALL_ISSUES_AND_USERS } ]
-  } )
+  const [assignIssue] = useMutation(ASSIGN_ISSUE, {
+    refetchQueries: [{ query: ALL_ISSUES_AND_USERS }],
+  });
   // update status of issue
-  const [ updateIssueStatus ] = useMutation( UPDATE_ISSUE_STATUS, {
-    refetchQueries: [ { query: ALL_ISSUES_AND_USERS } ]
-  } )
+  const [updateIssueStatus] = useMutation(UPDATE_ISSUE_STATUS, {
+    refetchQueries: [{ query: ALL_ISSUES_AND_USERS }],
+  });
 
   if (loading) return "loading...";
   if (error) return `Error! ${error.message}`;
@@ -62,10 +62,10 @@ export function IssuesList() {
   // console.log("issues in list: ", issues);
   // console.log("users in list: ", users)
 
-  const filteredIssues = issues.filter( ( issue: Issue ) => {
+  const filteredIssues = issues.filter((issue: Issue) => {
     const matchesSearch =
-      issue.title.toLowerCase().includes( searchQuery.toLowerCase() ) ||
-      issue.description.toLowerCase().includes( searchQuery.toLowerCase() );
+      issue.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      issue.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus =
       statusFilter === "all" || issue.status === statusFilter;
     const matchesAssignee =
@@ -73,27 +73,40 @@ export function IssuesList() {
       (assigneeFilter === "unassigned" && !issue.assignedTo) ||
       (issue.assignedTo && issue.assignedTo.id === assigneeFilter);
     return matchesSearch && matchesStatus && matchesAssignee;
-  } );
+  });
 
-  const handleCreateIssue = async ( issueData: Partial<Issue> ) => {
-    console.log( "Creating issue:", issueData );
-    await createIssue( { variables: { ...issueData } } )
+  const handleCreateIssue = async (issueData: Partial<Issue>) => {
+    console.log("Creating issue:", issueData);
+    await createIssue({ variables: { ...issueData } });
   };
 
-  const handleEditIssue = async ( issueData: Partial<Issue> ) => {
-    console.log( "Updating issue:", issueData );
-    await assignIssue( {
-      variables: {
-        id: issueData.id,
-        userId: issueData.assignedTo?.id
-      }
-    } )
-    await updateIssueStatus( {
-      variables: {
-        id: issueData.id,
-        status: issueData.status
-      }
-    } )
+  const handleEditIssue = async (issueData: Partial<Issue>) => {
+    console.log("Updating issue:", issueData);
+    console.log("issue status: ", issueData.status);
+    if (issueData.status === "OPEN") {
+      await assignIssue({
+        variables: {
+          id: issueData.id,
+          userId: issueData.assignedTo?.id,
+        },
+      });
+    }
+
+    if (issueData.status !== "OPEN") {
+      await updateIssueStatus({
+        variables: {
+          id: issueData.id,
+          status: issueData.status,
+        },
+      });
+    }
+
+    // await updateIssueStatus( {
+    //   variables: {
+    //     id: issueData.id,
+    //     status: issueData.status
+    //   }
+    // } )
   };
 
   const openEditModal = (issue: Issue) => {
@@ -104,8 +117,8 @@ export function IssuesList() {
   };
 
   return (
-    <PageLayout 
-      title="Issues" 
+    <PageLayout
+      title="Issues"
       subtitle="Track and manage all project issues"
       headerAction={
         <Button
@@ -122,153 +135,150 @@ export function IssuesList() {
           <CardHeader>
             <CardTitle className="text-2xl">Issue Management</CardTitle>
           </CardHeader>
-            <CardContent>
-              <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    placeholder="Search issues..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-
-                <Select
-                  value={assigneeFilter}
-                  onValueChange={setAssigneeFilter}
-                >
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Filter by assignee" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Assignees</SelectItem>
-                    <SelectItem value="unassigned">Unassigned</SelectItem>
-
-                    {/*update the users*/}
-
-                    {users.map((user: UserType) => (
-                      <SelectItem key={user.id} value={user.id}>
-                        {user.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <div className="flex space-x-2">
-                  {STATUS_OPTIONS_WITH_ALL.map((option) => (
-                    <Button
-                      key={option.value}
-                      variant={
-                        statusFilter === option.value ? "default" : "outline"
-                      }
-                      className={
-                        statusFilter === option.value
-                          ? "bg-blue-600 hover:bg-blue-700"
-                          : ""
-                      }
-                      size="sm"
-                      onClick={() => setStatusFilter(option.value)}
-                    >
-                      {option.label}
-                    </Button>
-                  ))}
-                </div>
+          <CardContent>
+            <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Search issues..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
               </div>
-            </CardContent>
-          </Card>
 
-          <Card className="bg-white">
-            <CardHeader>
-              <CardTitle className="text-2xl">
-                Issues ({filteredIssues.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {filteredIssues.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground">
-                    No issues found matching your criteria.
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {filteredIssues.map((issue: Issue) => (
-                    <div
-                      key={issue.title}
-                      className="flex items-center justify-between p-4 border rounded-lg bg-slate-50 hover:bg-white transition-colors"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center space-x-3">
-                          <h3 className="font-medium text-foreground truncate">
-                            {issue.title}
-                          </h3>
-                          <Badge
-                            className={`text-xs ${getStatusBadgeColor(
-                              issue.status
-                            )}`}
-                          >
-                            {issue.status.replace("-", " ")}
-                          </Badge>
-                        </div>
-                        <div className="flex items-center space-x-4 mt-2 text-sm text-muted-foreground">
-                          <div className="flex items-center space-x-1">
-                            <User className="h-3 w-3" />
-                            <span>
-                              {issue.assignedTo
-                                ? issue.assignedTo.name
-                                : "Unassigned"}
-                            </span>
-                          </div>
-                          <span>
-                            Updated{" "}
-                            {formatDistanceToNow(issue.updatedAt, {
-                              addSuffix: true,
-                            })}
-                          </span>
-                          <span>
-                            {issue.comments.length} comment
-                            {issue.comments.length !== 1 ? "s" : ""}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2 ml-4">
-                        <Button variant="ghost" size="sm" asChild>
-                          <Link to={`/issues/${issue.id}`}>
-                            <Eye className="h-4 w-4 mr-1" />
-                            View
-                          </Link>
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => openEditModal(issue)}
+              <Select value={assigneeFilter} onValueChange={setAssigneeFilter}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Filter by assignee" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Assignees</SelectItem>
+                  <SelectItem value="unassigned">Unassigned</SelectItem>
+
+                  {/*update the users*/}
+
+                  {users.map((user: UserType) => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <div className="flex space-x-2">
+                {STATUS_OPTIONS_WITH_ALL.map((option) => (
+                  <Button
+                    key={option.value}
+                    variant={
+                      statusFilter === option.value ? "default" : "outline"
+                    }
+                    className={
+                      statusFilter === option.value
+                        ? "bg-blue-600 hover:bg-blue-700"
+                        : ""
+                    }
+                    size="sm"
+                    onClick={() => setStatusFilter(option.value)}
+                  >
+                    {option.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white">
+          <CardHeader>
+            <CardTitle className="text-2xl">
+              Issues ({filteredIssues.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {filteredIssues.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">
+                  No issues found matching your criteria.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {filteredIssues.map((issue: Issue) => (
+                  <div
+                    key={issue.title}
+                    className="flex items-center justify-between p-4 border rounded-lg bg-slate-50 hover:bg-white transition-colors"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center space-x-3">
+                        <h3 className="font-medium text-foreground truncate">
+                          {issue.title}
+                        </h3>
+                        <Badge
+                          className={`text-xs ${getStatusBadgeColor(
+                            issue.status
+                          )}`}
                         >
-                          <Edit className="h-4 w-4 mr-1" />
-                          Edit
-                        </Button>
+                          {issue.status.replace("-", " ")}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center space-x-4 mt-2 text-sm text-muted-foreground">
+                        <div className="flex items-center space-x-1">
+                          <User className="h-3 w-3" />
+                          <span>
+                            {issue.assignedTo
+                              ? issue.assignedTo.name
+                              : "Unassigned"}
+                          </span>
+                        </div>
+                        <span>
+                          Updated{" "}
+                          {formatDistanceToNow(issue.updatedAt, {
+                            addSuffix: true,
+                          })}
+                        </span>
+                        <span>
+                          {issue.comments.length} comment
+                          {issue.comments.length !== 1 ? "s" : ""}
+                        </span>
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+                    <div className="flex items-center space-x-2 ml-4">
+                      <Button variant="ghost" size="sm" asChild>
+                        <Link to={`/issues/${issue.id}`}>
+                          <Eye className="h-4 w-4 mr-1" />
+                          View
+                        </Link>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => openEditModal(issue)}
+                      >
+                        <Edit className="h-4 w-4 mr-1" />
+                        Edit
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
-        <IssueModal
-          open={isCreateModalOpen}
-          onOpenChange={setIsCreateModalOpen}
-          onSave={handleCreateIssue}
-        />
+      <IssueModal
+        open={isCreateModalOpen}
+        onOpenChange={setIsCreateModalOpen}
+        onSave={handleCreateIssue}
+      />
 
-        <IssueModal
-          open={isEditModalOpen}
-          onOpenChange={setIsEditModalOpen}
-          issue={editingIssue}
-          users={users}
-          onSave={handleEditIssue}
-        />
-      </PageLayout>
+      <IssueModal
+        open={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        issue={editingIssue}
+        users={users}
+        onSave={handleEditIssue}
+      />
+    </PageLayout>
   );
 }
