@@ -107,7 +107,6 @@ export const ASSIGN_ISSUE = gql`
     ${ISSUE_SUMMARY}
 `
 
-
 export const UPDATE_ISSUE_STATUS = gql`
     mutation updateIssueStatus($id: ID!, $status: IssueStatus!) {
         updateIssueStatus(id: $id, status: $status) {
