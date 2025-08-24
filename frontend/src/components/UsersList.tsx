@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Navigation } from "./NavigationBar";
+import { PageLayout } from "./PageLayout";
 import { UserModal } from "./UserModal";
 import type { User } from "../lib/types";
 import { Plus, UserIcon, Mail, Edit, Trash2 } from "lucide-react";
@@ -56,37 +56,25 @@ export function UsersList() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100">
-      <header className="border-b bg-white shadow-sm">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">Users</h1>
-              <p className="text-sm text-muted-foreground">
-                Manage team members and user accounts
-              </p>
-            </div>
-            <Navigation />
-          </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-6 py-8">
-        <div className="space-y-6">
-          {/* Top Bar */}
-          <Card className="bg-white">
-            <CardHeader>
-              <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
-                <CardTitle className="text-lg">User Management</CardTitle>
-                <Button
-                  onClick={() => setIsCreateModalOpen(true)}
-                  className="w-fit bg-blue-600 hover:bg-blue-700"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create User
-                </Button>
-              </div>
-            </CardHeader>
+    <PageLayout 
+      title="Users" 
+      subtitle="Manage team members and user accounts"
+      headerAction={
+        <Button
+          onClick={() => setIsCreateModalOpen(true)}
+          className="w-fit bg-blue-600 hover:bg-blue-700"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Create User
+        </Button>
+      }
+    >
+      <div className="space-y-6">
+        {/* Top Bar */}
+        <Card className="bg-white">
+          <CardHeader>
+            <CardTitle className="text-lg">User Management</CardTitle>
+          </CardHeader>
           </Card>
 
            {/* User Stats */}
@@ -204,24 +192,22 @@ export function UsersList() {
             </CardContent>
           </Card>
 
-         
         </div>
-      </main>
 
-      {/* Create User Modal */}
-      <UserModal
-        open={isCreateModalOpen}
-        onOpenChange={setIsCreateModalOpen}
-        onSave={handleCreateUser}
-      />
+        {/* Create User Modal */}
+        <UserModal
+          open={isCreateModalOpen}
+          onOpenChange={setIsCreateModalOpen}
+          onSave={handleCreateUser}
+        />
 
-      {/* Edit User Modal */}
-      <UserModal
-        open={isEditModalOpen}
-        onOpenChange={setIsEditModalOpen}
-        user={editingUser}
-        onSave={handleEditUser}
-      />
-    </div>
+        {/* Edit User Modal */}
+        <UserModal
+          open={isEditModalOpen}
+          onOpenChange={setIsEditModalOpen}
+          user={editingUser}
+          onSave={handleEditUser}
+        />
+      </PageLayout>
   );
 }

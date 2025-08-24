@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import type { Issue, IssueStatus, User } from "@/lib/types";
+import { STATUS_OPTIONS } from "@/lib/utils";
 
 interface IssueModalProps {
   open: boolean;
@@ -28,13 +29,6 @@ interface IssueModalProps {
   users?: User[];
   onSave: (issueData: Partial<Issue>) => void;
 }
-
-const statusOptions: { value: IssueStatus; label: string }[] = [
-  { value: "OPEN", label: "Open" },
-  { value: "IN_PROGRESS", label: "In Progress" },
-  { value: "RESOLVED", label: "Resolved" },
-  { value: "CLOSED", label: "Closed" },
-];
 
 export function IssueModal({
   open,
@@ -158,7 +152,7 @@ export function IssueModal({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {statusOptions.map((option) => (
+                {STATUS_OPTIONS.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
                   </SelectItem>

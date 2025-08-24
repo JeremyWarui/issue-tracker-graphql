@@ -21,7 +21,7 @@ export interface Comment {
     id: string
     content: string
     // authorId: string
-    author: User | string
+    author: User
     issueId: string
     createdAt: string
 }

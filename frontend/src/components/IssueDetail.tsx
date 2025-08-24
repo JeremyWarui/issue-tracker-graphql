@@ -39,37 +39,13 @@ import {
   GET_ISSUE,
   UPDATE_ISSUE_STATUS
 } from "@/lib/queries.ts";
-
-const statusOptions: { value: IssueStatus; label: string; color: string }[] = [
-  { value: "OPEN", label: "Open", color: "secondary" },
-  { value: "IN_PROGRESS", label: "In Progress", color: "default" },
-  { value: "RESOLVED", label: "Resolved", color: "outline" },
-  { value: "CLOSED", label: "Closed", color: "outline" },
-  { value: "ASSIGNED", label: "Assigned", color: "outline" },
-
-];
-
-function getStatusBadgeColor(status: IssueStatus) {
-  switch (status) {
-    case "OPEN":
-      return "text-red-700 bg-red-100 border-red-200";
-    case "IN_PROGRESS":
-      return "text-blue-700 bg-blue-100 border-blue-200";
-    case "RESOLVED":
-      return "text-green-700 bg-green-100 border-green-200";
-    case "CLOSED":
-      return "text-gray-700 bg-gray-100 border-gray-200";
-    default:
-      return "";
-  }
-}
+import { STATUS_OPTIONS, getStatusBadgeColor } from "@/lib/utils";
 
 export function IssueDetail() {
   // State for editing
   const [status, setStatus] = useState<IssueStatus>("OPEN");
   const [assignedToId, setAssignedToId] = useState("");
   const [newComment, setNewComment] = useState("");
-  const [comments, setComments] = useState<Comment[]>([]);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   // using the useQuery
@@ -148,16 +124,13 @@ export function IssueDetail() {
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
 
-    const comment: Comment = {
-      id: Date.now().toString(),
-      content: newComment,
-      author: "u2b3c4d5-e6f7-8901-1121-314151617181",
-      issueId: issue.id,
-      createdAt: new Date().toISOString(),
-    };
-
-    await addComment({ variables: { ...comment }})
-    setComments([...comments, comment]);
+    await addComment({ 
+      variables: { 
+        content: newComment,
+        author: "u2b3c4d5-e6f7-8901-1121-314151617181",
+        issueId: issue.id,
+      }
+    });
     setNewComment("");
   };
 
@@ -362,7 +335,7 @@ export function IssueDetail() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {statusOptions.map((option) => (
+                      {STATUS_OPTIONS.map((option) => (
                         <SelectItem key={option.value} value={option.value}>
                           {option.label}
                         </SelectItem>

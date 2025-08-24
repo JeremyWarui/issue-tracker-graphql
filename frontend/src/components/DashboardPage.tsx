@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Navigation } from "./NavigationBar";
+import { PageLayout } from "./PageLayout";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
 import {
@@ -9,6 +9,7 @@ import {
   AlertCircle,
   XCircle,
 } from "lucide-react";
+import { getStatusBadgeColor } from "@/lib/utils";
 
 // use data from GraphQL
 import { useQuery } from "@apollo/client/react";
@@ -29,23 +30,6 @@ function getStatusIcon(status: string) {
       return FileText;
     default:
       return FileText;
-  }
-}
-
-function getStatusBadgeColor(status: string) {
-  switch (status) {
-    case "OPEN":
-      return "text-red-700 bg-red-100 border-red-200";
-    case "IN_PROGRESS":
-      return "text-blue-700 bg-blue-100 border-blue-200";
-    case "RESOLVED":
-      return "text-green-700 bg-green-100 border-green-200";
-    case "CLOSED":
-      return "text-gray-700 bg-gray-100 border-gray-200";
-    case "ASSIGNED":
-      return "text-amber-700 bg-amber-100 border-amber-200";
-    default:
-      return "";
   }
 }
 
@@ -80,28 +64,14 @@ export function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100">
-      <header className="border-b bg-white shadow-sm">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">
-                Issue Tracker
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Manage and track your team's issues efficiently
-              </p>
-            </div>
-            <Navigation />
-          </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-6 py-8">
-        <div className="space-y-8">
-          {/* Stats Cards */}
-          <div>
-            <h2 className="text-lg font-semibold mb-4">Status Overview</h2>
+    <PageLayout 
+      title="Issue Tracker" 
+      subtitle="Manage and track your team's issues efficiently"
+    >
+      <div className="space-y-8">
+        {/* Stats Cards */}
+        <div>
+          <h2 className="text-lg font-semibold mb-4">Status Overview</h2>
             <div className="grid gap-4 md:grid-cols-4">
               <Card className="bg-white">
                 <CardContent className="py-4">
@@ -206,7 +176,6 @@ export function Dashboard() {
             </Card>
           </div>
         </div>
-      </main>
-    </div>
+      </PageLayout>
   );
 }

@@ -13,12 +13,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Navigation } from "./NavigationBar";
 import { IssueModal } from "./IssueModal";
+import { PageLayout } from "./PageLayout";
 // import { mockUsers } from "../lib/mock-data";
 import type { IssueStatus, Issue, User as UserType } from "../lib/types";
 import { Search, Plus, Eye, Edit, User } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { STATUS_OPTIONS_WITH_ALL, getStatusBadgeColor } from "@/lib/utils";
 
 // use data from GraphQL
 import { useQuery, useMutation } from "@apollo/client/react";
@@ -29,31 +30,6 @@ import {
   UPDATE_ISSUE_STATUS
 } from "@/lib/queries.ts";
 // create issue or update issue
-
-
-
-const statusOptions: { value: IssueStatus | "all"; label: string }[] = [
-  { value: "all", label: "All Status" },
-  { value: "OPEN", label: "Open" },
-  { value: "IN_PROGRESS", label: "In Progress" },
-  { value: "RESOLVED", label: "Resolved" },
-  { value: "CLOSED", label: "Closed" },
-];
-
-function getStatusBadgeColor(status: IssueStatus) {
-  switch (status) {
-    case "OPEN":
-      return "text-red-700 bg-red-100 border-red-200";
-    case "IN_PROGRESS":
-      return "text-blue-700 bg-blue-100 border-blue-200";
-    case "RESOLVED":
-      return "text-green-700 bg-green-100 border-green-200";
-    case "CLOSED":
-      return "text-gray-700 bg-gray-100 border-gray-200";
-    default:
-      return "";
-  }
-}
 
 export function IssuesList() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -128,36 +104,24 @@ export function IssuesList() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100">
-      <header className="border-b bg-white shadow-sm">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">Issues</h1>
-              <p className="text-sm text-muted-foreground">
-                Track and manage all project issues
-              </p>
-            </div>
-            <Navigation />
-          </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-6 py-8">
-        <div className="space-y-6">
-          <Card className="bg-white">
-            <CardHeader>
-              <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
-                <CardTitle className="text-2xl">Issue Management</CardTitle>
-                <Button
-                  onClick={() => setIsCreateModalOpen(true)}
-                  className="w-fit bg-blue-600 hover:bg-blue-700"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Issue
-                </Button>
-              </div>
-            </CardHeader>
+    <PageLayout 
+      title="Issues" 
+      subtitle="Track and manage all project issues"
+      headerAction={
+        <Button
+          onClick={() => setIsCreateModalOpen(true)}
+          className="w-fit bg-blue-600 hover:bg-blue-700"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Create Issue
+        </Button>
+      }
+    >
+      <div className="space-y-6">
+        <Card className="bg-white">
+          <CardHeader>
+            <CardTitle className="text-2xl">Issue Management</CardTitle>
+          </CardHeader>
             <CardContent>
               <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4">
                 <div className="relative flex-1">
@@ -192,7 +156,7 @@ export function IssuesList() {
                 </Select>
 
                 <div className="flex space-x-2">
-                  {statusOptions.map((option) => (
+                  {STATUS_OPTIONS_WITH_ALL.map((option) => (
                     <Button
                       key={option.value}
                       variant={
@@ -291,21 +255,20 @@ export function IssuesList() {
             </CardContent>
           </Card>
         </div>
-      </main>
 
-      <IssueModal
-        open={isCreateModalOpen}
-        onOpenChange={setIsCreateModalOpen}
-        onSave={handleCreateIssue}
-      />
+        <IssueModal
+          open={isCreateModalOpen}
+          onOpenChange={setIsCreateModalOpen}
+          onSave={handleCreateIssue}
+        />
 
-      <IssueModal
-        open={isEditModalOpen}
-        onOpenChange={setIsEditModalOpen}
-        issue={editingIssue}
-        users={users}
-        onSave={handleEditIssue}
-      />
-    </div>
+        <IssueModal
+          open={isEditModalOpen}
+          onOpenChange={setIsEditModalOpen}
+          issue={editingIssue}
+          users={users}
+          onSave={handleEditIssue}
+        />
+      </PageLayout>
   );
 }
