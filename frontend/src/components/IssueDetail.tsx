@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/select";
 import { Navigation } from "./NavigationBar";
 import { IssueModal } from "./IssueModal";
-import { mockUsers } from "../lib/mock-data";
 import type {
   IssueStatus,
   Comment,
@@ -33,14 +32,21 @@ import {
   Edit,
 } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
-import { useQuery } from "@apollo/client/react";
-import { GET_ISSUE } from "@/lib/queries.ts";
+import { useMutation, useQuery } from "@apollo/client/react";
+import {
+  ALL_ISSUES_AND_USERS, ASSIGN_ISSUE,
+  CREATE_COMMENT,
+  GET_ISSUE,
+  UPDATE_ISSUE_STATUS
+} from "@/lib/queries.ts";
 
 const statusOptions: { value: IssueStatus; label: string; color: string }[] = [
   { value: "OPEN", label: "Open", color: "secondary" },
   { value: "IN_PROGRESS", label: "In Progress", color: "default" },
   { value: "RESOLVED", label: "Resolved", color: "outline" },
   { value: "CLOSED", label: "Closed", color: "outline" },
+  { value: "ASSIGNED", label: "Assigned", color: "outline" },
+
 ];
 
 function getStatusBadgeColor(status: IssueStatus) {
@@ -73,8 +79,22 @@ export function IssueDetail() {
   // Find the issue by ID
 
   const { loading, error, data } = useQuery<IssueQueryData>(GET_ISSUE, {
-    variables: { id },
+    variables: { id }
   });
+
+  // create comment to API
+  const [ addComment ] = useMutation(CREATE_COMMENT, {
+    refetchQueries: [ { query: ALL_ISSUES_AND_USERS }]
+  })
+
+  // assign issue
+  const [ assignIssue ] = useMutation( ASSIGN_ISSUE, {
+    refetchQueries: [ { query: ALL_ISSUES_AND_USERS } ]
+  } )
+  // update status of issue
+  const [ updateIssueStatus ] = useMutation( UPDATE_ISSUE_STATUS, {
+    refetchQueries: [ { query: ALL_ISSUES_AND_USERS } ]
+  } )
 
   useEffect(() => {
     if (data?.issue) {
@@ -89,6 +109,7 @@ export function IssueDetail() {
 
   const { issue, users } = data;
   // console.log("issue Fetched: ", issue);
+  // console.log("issue status: ", status)
   // console.log("users in list: ", users)
 
   const handleBack = () => {
@@ -124,33 +145,60 @@ export function IssueDetail() {
     );
   }
 
-  const handleAddComment = () => {
+  const handleAddComment = async () => {
     if (!newComment.trim()) return;
 
     const comment: Comment = {
       id: Date.now().toString(),
       content: newComment,
-      // authorId: "1", // Mock current user
-      author: mockUsers[0], // Mock current user
+      author: "u2b3c4d5-e6f7-8901-1121-314151617181",
       issueId: issue.id,
       createdAt: new Date().toISOString(),
     };
 
+    await addComment({ variables: { ...comment }})
     setComments([...comments, comment]);
     setNewComment("");
   };
 
-  const handleEditIssue = async (issueData: Partial<Issue>) => {
+  const handleEditIssue = async () => {
+    const issueData: Partial<Issue> = {
+      id: issue.id,
+      status,
+      assignedTo:
+        assignedToId && assignedToId !== "unassigned"
+          ? ({ id: assignedToId } as UserType)
+          : undefined,
+    };
+
     console.log("Updating issue:", issueData);
-    // In a real app, this would make an API call and update the issue
-    // For now, just log the data
+
+    // Run mutations in sequence
+    if (issueData.assignedTo) {
+      await assignIssue({
+        variables: {
+          id: issueData.id,
+          userId: issueData.assignedTo.id,
+        },
+      });
+    }
+
+    if (issueData.status) {
+      await updateIssueStatus({
+        variables: {
+          id: issueData.id,
+          status: issueData.status,
+        },
+      });
+    }
   };
+
 
   const assignedUser = users.find(
     (user: UserType) => user.id === issue.assignedTo?.id
   );
-  console.log("assigned user: ", assignedUser);
-  console.log("issue.assignedTo: ", issue.assignedTo);
+  // console.log("assigned user: ", assignedUser);
+  // console.log("issue.assignedTo: ", issue.assignedTo);
 
   return (
     <div className="min-h-screen bg-slate-100">
@@ -252,7 +300,7 @@ export function IssueDetail() {
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center space-x-2">
                           <span className="font-medium text-md">
-                            {comment.author.name}
+                            {comment.author?.name}
                           </span>
                           <span className="text-xs text-muted-foreground">
                             {formatDistanceToNow(comment.createdAt, {
@@ -307,7 +355,7 @@ export function IssueDetail() {
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Status</label>
                   <Select
-                    value={issue.status}
+                    value={status}
                     onValueChange={(value: IssueStatus) => setStatus(value)}
                   >
                     <SelectTrigger>
@@ -339,7 +387,9 @@ export function IssueDetail() {
                     </SelectContent>
                   </Select>
                 </div>
-                <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                <Button className="w-full bg-blue-600 hover:bg-blue-700"
+                        onClick={ handleEditIssue }
+                >
                   Save Changes
                 </Button>
               </CardContent>

@@ -21,12 +21,12 @@ export interface Comment {
     id: string
     content: string
     // authorId: string
-    author: User
+    author: User | string
     issueId: string
     createdAt: string
 }
 
-export type IssueStatus = "OPEN" | "IN_PROGRESS" | "CLOSED" | "RESOLVED"
+export type IssueStatus = "OPEN" | "IN_PROGRESS" | "CLOSED" | "RESOLVED" | "ASSIGNED"
 
 export interface DashboardStats {
     total: number

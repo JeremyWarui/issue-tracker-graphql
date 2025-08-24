@@ -21,8 +21,16 @@ import { Search, Plus, Eye, Edit, User } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 // use data from GraphQL
-import { useQuery } from "@apollo/client/react";
-import { ALL_ISSUES_AND_USERS } from "@/lib/queries.ts";
+import { useQuery, useMutation } from "@apollo/client/react";
+import {
+  ALL_ISSUES_AND_USERS,
+  ASSIGN_ISSUE,
+  CREATE_ISSUE,
+  UPDATE_ISSUE_STATUS
+} from "@/lib/queries.ts";
+// create issue or update issue
+
+
 
 const statusOptions: { value: IssueStatus | "all"; label: string }[] = [
   { value: "all", label: "All Status" },
@@ -56,6 +64,19 @@ export function IssuesList() {
   const [editingIssue, setEditingIssue] = useState<Issue | null>(null);
 
   const { loading, error, data } = useQuery(ALL_ISSUES_AND_USERS);
+  // create issue
+  const [ createIssue ] = useMutation( CREATE_ISSUE, {
+    refetchQueries: [ { query: ALL_ISSUES_AND_USERS } ]
+  } )
+  // assign issue
+  const [ assignIssue ] = useMutation( ASSIGN_ISSUE, {
+    refetchQueries: [ { query: ALL_ISSUES_AND_USERS } ]
+  } )
+  // update status of issue
+  const [ updateIssueStatus ] = useMutation( UPDATE_ISSUE_STATUS, {
+    refetchQueries: [ { query: ALL_ISSUES_AND_USERS } ]
+  } )
+
   if (loading) return "loading...";
   if (error) return `Error! ${error.message}`;
 
@@ -65,10 +86,10 @@ export function IssuesList() {
   // console.log("issues in list: ", issues);
   // console.log("users in list: ", users)
 
-  const filteredIssues = issues.filter((issue: Issue) => {
+  const filteredIssues = issues.filter( ( issue: Issue ) => {
     const matchesSearch =
-      issue.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      issue.description.toLowerCase().includes(searchQuery.toLowerCase());
+      issue.title.toLowerCase().includes( searchQuery.toLowerCase() ) ||
+      issue.description.toLowerCase().includes( searchQuery.toLowerCase() );
     const matchesStatus =
       statusFilter === "all" || issue.status === statusFilter;
     const matchesAssignee =
@@ -76,14 +97,27 @@ export function IssuesList() {
       (assigneeFilter === "unassigned" && !issue.assignedTo) ||
       (issue.assignedTo && issue.assignedTo.id === assigneeFilter);
     return matchesSearch && matchesStatus && matchesAssignee;
-  });
+  } );
 
-  const handleCreateIssue = async (issueData: Partial<Issue>) => {
-    console.log("Creating issue:", issueData);
+  const handleCreateIssue = async ( issueData: Partial<Issue> ) => {
+    console.log( "Creating issue:", issueData );
+    await createIssue( { variables: { ...issueData } } )
   };
 
-  const handleEditIssue = async (issueData: Partial<Issue>) => {
-    console.log("Updating issue:", issueData);
+  const handleEditIssue = async ( issueData: Partial<Issue> ) => {
+    console.log( "Updating issue:", issueData );
+    await assignIssue( {
+      variables: {
+        id: issueData.id,
+        userId: issueData.assignedTo?.id
+      }
+    } )
+    await updateIssueStatus( {
+      variables: {
+        id: issueData.id,
+        status: issueData.status
+      }
+    } )
   };
 
   const openEditModal = (issue: Issue) => {
