@@ -146,17 +146,14 @@ export function IssueDetail() {
 
     console.log("Updating issue:", issueData);
 
-    // Run mutations in sequence
-    if (issueData.assignedTo) {
-      await assignIssue({
+    await assignIssue({
         variables: {
           id: issueData.id,
-          userId: issueData.assignedTo.id,
+          userId: issueData.assignedTo?.id,
         },
-      });
-    }
-
-    if (issueData.status) {
+    });
+  
+    if (issueData.status !== "OPEN") {
       await updateIssueStatus({
         variables: {
           id: issueData.id,
