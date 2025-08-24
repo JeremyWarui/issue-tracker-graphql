@@ -63,7 +63,7 @@ export const ALL_ISSUES_AND_USERS = gql`
     ${USER_INFO}
 `
 
-export const GET_ISSUE = gql(`
+export const GET_ISSUE = gql`
     query getIssue($id: ID!) {
         issue(id: $id) {
             ...IssueDetails
@@ -74,7 +74,7 @@ export const GET_ISSUE = gql(`
     }
     ${ISSUE_DETAIL}
     ${USER_INFO}
-`)
+`
 
 export const ALL_USERS = gql`
     query allUsers {
@@ -89,24 +89,24 @@ export const ALL_USERS = gql`
 
 `
 
-export const CREATE_ISSUE = gql(`
+export const CREATE_ISSUE = gql`
     mutation createIssue($title: String!, $description: String!) {
         createIssue (title: $title, description: $description) {
             ...IssueSummary
         }
     }
     ${ISSUE_SUMMARY}
-`)
+`
 
-export const ASSIGN_ISSUE = gql(`
+export const ASSIGN_ISSUE = gql`
     mutation assignIssue($id: ID!, $userId: String!) {
         assignIssue(id: $id, userId: $userId) {
             ...IssueSummary
         }
     }
     ${ISSUE_SUMMARY}
-  `
-)
+`
+
 
 export const UPDATE_ISSUE_STATUS = gql`
     mutation updateIssueStatus($id: ID!, $status: IssueStatus!) {
