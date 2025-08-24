@@ -16,7 +16,7 @@ import {
 import { Navigation } from "./NavigationBar";
 import { IssueModal } from "./IssueModal";
 // import { mockUsers } from "../lib/mock-data";
-import type { IssueStatus, Issue, User as UserType  } from "../lib/types";
+import type { IssueStatus, Issue, User as UserType } from "../lib/types";
 import { Search, Plus, Eye, Edit, User } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -61,9 +61,9 @@ export function IssuesList() {
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
-  const { issues , users } = data;
-  console.log("issues in list: ", issues);
-  console.log("users in list: ", users)
+  const { issues, users } = data;
+  // console.log("issues in list: ", issues);
+  // console.log("users in list: ", users)
 
   const filteredIssues = issues.filter((issue: Issue) => {
     const matchesSearch =
@@ -87,6 +87,8 @@ export function IssuesList() {
   };
 
   const openEditModal = (issue: Issue) => {
+    // console.log("Updating issue:", issue);
+    // console.log("users passed on for editing:", users);
     setEditingIssue(issue);
     setIsEditModalOpen(true);
   };
@@ -267,6 +269,7 @@ export function IssuesList() {
         open={isEditModalOpen}
         onOpenChange={setIsEditModalOpen}
         issue={editingIssue}
+        users={users}
         onSave={handleEditIssue}
       />
     </div>

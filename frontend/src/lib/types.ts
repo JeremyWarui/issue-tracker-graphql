@@ -2,7 +2,7 @@ export interface User {
     id: string
     name: string
     email?: string
-    createdAt: Date
+    assignedIssues: Issue[]
 }
 
 export interface Issue {
@@ -11,7 +11,7 @@ export interface Issue {
     description: string
     status: IssueStatus
     // assigneeId?: string
-    assignedTo?: User
+    assignedTo: User
     createdAt: Date
     updatedAt: Date
     comments: Comment[]
@@ -35,3 +35,9 @@ export interface DashboardStats {
     closed: number
     resolved: number
 }
+
+
+export type IssueQueryData = {
+    issue: Issue;
+    users: User[];
+};

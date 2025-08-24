@@ -19,13 +19,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { mockUsers } from "@/lib/mock-data";
-import type {Issue, IssueStatus, User} from "@/lib/types";
+import type { Issue, IssueStatus, User } from "@/lib/types";
 
 interface IssueModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   issue?: Issue | null;
+  users?: User[];
   onSave: (issueData: Partial<Issue>) => void;
 }
 
@@ -40,15 +40,18 @@ export function IssueModal({
   open,
   onOpenChange,
   issue,
+  users = [],
   onSave,
 }: IssueModalProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState<IssueStatus>("OPEN");
-  const [assigneeId, setAssigneeId] = useState<User>();
+  const [assigneeId, setAssigneeId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const isEditing = !!issue;
+
+  // console.log("users passed on: ", users)
 
   // Reset form when modal opens/closes or issue changes
   useEffect(() => {
@@ -58,19 +61,28 @@ export function IssueModal({
         setTitle(issue.title);
         setDescription(issue.description);
         setStatus(issue.status);
-        setAssigneeId(issue.assignedTo);
+        setAssigneeId(issue.assignedTo?.id ?? "unassigned");
       } else {
         // Creating new issue
         setTitle("");
         setDescription("");
+        setStatus("OPEN");
+        setAssigneeId("unassigned");
       }
     }
   }, [open, issue]);
+
+  // console.log("issue: ", issue)
+  // console.log("title: ", title)
+  // console.log("desc: ", description)
+  // console.log("status: ", status)
+  // console.log("assignedTo: ", assigneeId)
 
   const handleSave = async () => {
     if (!title.trim() || !description.trim()) {
       return;
     }
+    const selectedUser = users.find((u) => u.id === assigneeId);
 
     setIsLoading(true);
 
@@ -78,7 +90,7 @@ export function IssueModal({
       title: title.trim(),
       description: description.trim(),
       status,
-      // assigneeId: assigneeId === "unassigned" ? undefined : assigneeId,
+      assignedTo: assigneeId === "unassigned" ? undefined : selectedUser,
     };
 
     if (isEditing && issue) {
@@ -86,7 +98,7 @@ export function IssueModal({
     }
 
     try {
-      await onSave(issueData);
+      onSave(issueData);
       onOpenChange(false);
     } catch (error) {
       console.error("Error saving issue:", error);
@@ -157,7 +169,7 @@ export function IssueModal({
 
           {/* Assignee Field */}
           <div className="space-y-2">
-            <Label htmlFor="assignee">Assign To</Label>
+            <Label htmlFor="assignee">Assigned To</Label>
             <Select
               value={assigneeId}
               onValueChange={setAssigneeId}
@@ -168,7 +180,7 @@ export function IssueModal({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="unassigned">Unassigned</SelectItem>
-                {mockUsers.map((user) => (
+                {users.map((user: User) => (
                   <SelectItem key={user.id} value={user.id}>
                     {user.name}
                   </SelectItem>

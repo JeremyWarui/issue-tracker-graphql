@@ -1,10 +1,11 @@
-import {gql} from "@apollo/client";
+import { gql } from "@apollo/client";
 
 export const ALL_ISSUES_AND_USERS = gql`
     query allIssuesAndUsers($status: String, $assignedTo: String) {
         issues(status: $status, assignedTo: $assignedTo) {
             id
             title
+            description
             status
             updatedAt
             assignedTo {
@@ -51,3 +52,17 @@ export const GET_ISSUE = gql(`
         }
     }
 `)
+
+export const ALL_USERS = gql`
+    query allUsers {
+        users {
+            id
+            name
+            email
+            assignedIssues {
+                id
+            }
+        }
+    }
+
+`

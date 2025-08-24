@@ -6,23 +6,34 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Navigation } from "./NavigationBar";
 import { UserModal } from "./UserModal";
-import { mockUsers, mockIssues } from "../lib/mock-data";
 import type { User } from "../lib/types";
 import { Plus, UserIcon, Mail, Edit, Trash2 } from "lucide-react";
-import { format } from "date-fns";
+
+
+// use data from GraphQL
+import { useQuery } from "@apollo/client/react";
+import { ALL_USERS } from "@/lib/queries.ts";
 
 export function UsersList() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
 
+  //fetch users and issues
+  const { loading, error, data } = useQuery(ALL_USERS);
+  if (loading) return "loading...";
+  if (error) return `Error! ${error.message}`;
+
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
+  const { users } = data;
+
   // Calculate assigned issues count for each user
-  const usersWithIssueCount = mockUsers.map((user) => ({
+  const usersWithIssueCount = users.map((user: User) => ({
     ...user,
-    assignedIssuesCount: mockIssues.filter(
-      (issue) => issue.assigneeId === user.id
-    ).length,
+    assignedIssuesCount: user.assignedIssues.length,
   }));
+  console.log("users with issue count: " , usersWithIssueCount)
 
   const handleCreateUser = async (userData: Partial<User>) => {
     console.log("Creating user:", userData);
@@ -78,16 +89,63 @@ export function UsersList() {
             </CardHeader>
           </Card>
 
+           {/* User Stats */}
+          <div className="grid gap-4 md:grid-cols-3">
+            <Card className="bg-white">
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary">
+                    {usersWithIssueCount.length}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Total Users
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="bg-white">
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-secondary">
+                    {
+                      usersWithIssueCount.filter(
+                        (user: User) => user.assignedIssues.length > 0
+                      ).length
+                    }
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Active Users
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="bg-white">
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-accent">
+                    {usersWithIssueCount.reduce(
+                      (total: number, user: User) => total + user.assignedIssues.length,
+                      0
+                    )}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Total Assignments
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
           {/* Users Table */}
           <Card className="bg-white">
             <CardHeader>
               <CardTitle className="text-base">
-                Team Members ({usersWithIssueCount.length})
+                Team Members ({users.length})
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {usersWithIssueCount.map((user) => (
+                {usersWithIssueCount.map((user: User) => (
                   <div
                     key={user.id}
                     className="flex items-center justify-between p-4 border rounded-lg bg-slate-50 hover:bg-white transition-colors"
@@ -98,16 +156,16 @@ export function UsersList() {
                       </div>
                       <div className="space-y-1">
                         <div className="flex items-center space-x-3">
-                          <h3 className="font-medium text-foreground">
+                          {/* <h3 className="font-medium text-foreground">
                             #{user.id}
-                          </h3>
+                          </h3> */}
                           <span className="text-foreground font-medium">
                             {user.name}
                           </span>
-                          {user.assignedIssuesCount > 0 && (
+                          {user.assignedIssues.length > 0 && (
                             <Badge variant="secondary" className="text-xs">
-                              {user.assignedIssuesCount} issue
-                              {user.assignedIssuesCount !== 1 ? "s" : ""}
+                              {user.assignedIssues.length} issue
+                              {user.assignedIssues.length !== 1 ? "s" : ""}
                             </Badge>
                           )}
                         </div>
@@ -118,9 +176,6 @@ export function UsersList() {
                               <span>{user.email}</span>
                             </div>
                           )}
-                          <span>
-                            Joined {format(user.createdAt, "MMM d, yyyy")}
-                          </span>
                         </div>
                       </div>
                     </div>
@@ -149,52 +204,7 @@ export function UsersList() {
             </CardContent>
           </Card>
 
-          {/* User Stats */}
-          <div className="grid gap-4 md:grid-cols-3">
-            <Card className="bg-white">
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">
-                    {usersWithIssueCount.length}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    Total Users
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="bg-white">
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-secondary">
-                    {
-                      usersWithIssueCount.filter(
-                        (user) => user.assignedIssuesCount > 0
-                      ).length
-                    }
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    Active Users
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="bg-white">
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-accent">
-                    {usersWithIssueCount.reduce(
-                      (total, user) => total + user.assignedIssuesCount,
-                      0
-                    )}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    Total Assignments
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+         
         </div>
       </main>
 

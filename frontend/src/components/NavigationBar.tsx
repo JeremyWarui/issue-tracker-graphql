@@ -8,7 +8,6 @@ export function Navigation() {
   const isActive = (path: string) => {
     if (path === "/" && location.pathname === "/") return true;
     return path !== "/" && location.pathname.startsWith(path);
-
   };
 
   return (

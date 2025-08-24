@@ -67,7 +67,7 @@ export function Dashboard() {
     )
     .slice(0, 5);
 
-  console.log("recent issues: ", recentIssues);
+  // console.log("recent issues: ", recentIssues);
 
   const stats = {
     total: issues.length,

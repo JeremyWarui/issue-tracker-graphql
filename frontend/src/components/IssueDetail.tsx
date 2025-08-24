@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,8 +16,14 @@ import {
 } from "@/components/ui/select";
 import { Navigation } from "./NavigationBar";
 import { IssueModal } from "./IssueModal";
-import { mockIssues, mockUsers } from "../lib/mock-data";
-import type { IssueStatus, Comment, Issue, User as UserType } from "../lib/types";
+import { mockUsers } from "../lib/mock-data";
+import type {
+  IssueStatus,
+  Comment,
+  Issue,
+  User as UserType,
+  IssueQueryData,
+} from "../lib/types";
 import {
   ArrowLeft,
   User,
@@ -27,8 +33,8 @@ import {
   Edit,
 } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
-import {useQuery} from "@apollo/client/react";
-import {ALL_ISSUES_AND_USERS, GET_ISSUE} from "@/lib/queries.ts";
+import { useQuery } from "@apollo/client/react";
+import { GET_ISSUE } from "@/lib/queries.ts";
 
 const statusOptions: { value: IssueStatus; label: string; color: string }[] = [
   { value: "OPEN", label: "Open", color: "secondary" },
@@ -37,37 +43,53 @@ const statusOptions: { value: IssueStatus; label: string; color: string }[] = [
   { value: "CLOSED", label: "Closed", color: "outline" },
 ];
 
-function getStatusBadgeVariant(status: IssueStatus) {
-  const option = statusOptions.find((opt) => opt.value === status);
-  return (option?.color) || "secondary";
+function getStatusBadgeColor(status: IssueStatus) {
+  switch (status) {
+    case "OPEN":
+      return "text-red-700 bg-red-100 border-red-200";
+    case "IN_PROGRESS":
+      return "text-blue-700 bg-blue-100 border-blue-200";
+    case "RESOLVED":
+      return "text-green-700 bg-green-100 border-green-200";
+    case "CLOSED":
+      return "text-gray-700 bg-gray-100 border-gray-200";
+    default:
+      return "";
+  }
 }
 
 export function IssueDetail() {
+  // State for editing
+  const [status, setStatus] = useState<IssueStatus>("OPEN");
+  const [assignedToId, setAssignedToId] = useState("");
+  const [newComment, setNewComment] = useState("");
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  // using the useQuery
   const { id } = useParams();
   const navigate = useNavigate();
-  console.log("id: ", id)
+  // console.log("id: ", id)
   // Find the issue by ID
-  const { loading, error, data } = useQuery(GET_ISSUE, {
-    variables: { id }
+
+  const { loading, error, data } = useQuery<IssueQueryData>(GET_ISSUE, {
+    variables: { id },
   });
+
+  useEffect(() => {
+    if (data?.issue) {
+      setStatus(data.issue.status);
+      setAssignedToId(data.issue.assignedTo?.id || "unassigned");
+    }
+  }, [data]);
+
   if (loading) return "loading...";
   if (error) return `Error! ${error.message}`;
+  if (!data) return null;
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
-  const { issue , users } = data;
-  console.log("issue Fetched: ", issue);
-  console.log("users in list: ", users)
-
-
-  // State for editing
-  // const [status, setStatus] = useState<IssueStatus>(issue?.status || "OPEN");
-  // const [assigneeId, setAssigneeId] = useState<string>(
-  //   issue?.assignedTo?.id || "unassigned"
-  // );
-  // const [newComment, setNewComment] = useState("");
-  // const [comments, setComments] = useState(issue?.comments || []);
-  // const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const { issue, users } = data;
+  // console.log("issue Fetched: ", issue);
+  // console.log("users in list: ", users)
 
   const handleBack = () => {
     navigate("/issues");
@@ -111,7 +133,7 @@ export function IssueDetail() {
       // authorId: "1", // Mock current user
       author: mockUsers[0], // Mock current user
       issueId: issue.id,
-      createdAt: new Date(),
+      createdAt: new Date().toISOString(),
     };
 
     setComments([...comments, comment]);
@@ -124,7 +146,11 @@ export function IssueDetail() {
     // For now, just log the data
   };
 
-  const assignedUser = users.find((user: UserType) => user.id === issue.assignedTo);
+  const assignedUser = users.find(
+    (user: UserType) => user.id === issue.assignedTo?.id
+  );
+  console.log("assigned user: ", assignedUser);
+  console.log("issue.assignedTo: ", issue.assignedTo);
 
   return (
     <div className="min-h-screen bg-slate-100">
@@ -151,7 +177,6 @@ export function IssueDetail() {
           </div>
         </div>
       </header>
-
       <main className="container mx-auto px-6 py-8">
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Main Content */}
@@ -165,8 +190,10 @@ export function IssueDetail() {
                       <h2 className="text-xl font-semibold text-foreground">
                         {issue.title}
                       </h2>
-                      <Badge variant={getStatusBadgeVariant(status)}>
-                        {status.replace("-", " ")}
+                      <Badge
+                        className={`text-xs ${getStatusBadgeColor(status)}`}
+                      >
+                        {issue.status.replace("-", " ")}
                       </Badge>
                     </div>
                     <div className="flex items-center space-x-4 text-sm text-muted-foreground">
@@ -239,32 +266,30 @@ export function IssueDetail() {
                       </p>
                     </div>
                   ))}
-
                   {issue.comments.length === 0 && (
                     <p className="text-muted-foreground text-sm">
                       No comments yet. Be the first to comment!
                     </p>
                   )}
-
-                  {/* Add Comment */}
-                  {/*<div className="border-t pt-4">*/}
-                  {/*  <div className="space-y-3">*/}
-                  {/*    <Textarea*/}
-                  {/*      placeholder="Add a comment..."*/}
-                  {/*      value={newComment}*/}
-                  {/*      onChange={(e) => setNewComment(e.target.value)}*/}
-                  {/*      rows={3}*/}
-                  {/*    />*/}
-                  {/*    <Button*/}
-                  {/*      onClick={handleAddComment}*/}
-                  {/*      disabled={!newComment.trim()}*/}
-                  {/*      className="bg-blue-600 hover:bg-blue-700"*/}
-                  {/*    >*/}
-                  {/*      <Send className="h-4 w-4 mr-2" />*/}
-                  {/*      Add Comment*/}
-                  {/*    </Button>*/}
-                  {/*  </div>*/}
-                  {/*</div>*/}
+                  Add Comment
+                  <div className="border-t pt-4">
+                    <div className="space-y-3">
+                      <Textarea
+                        placeholder="Add a comment..."
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                        rows={3}
+                      />
+                      <Button
+                        onClick={handleAddComment}
+                        disabled={!newComment.trim()}
+                        className="bg-blue-600 hover:bg-blue-700"
+                      >
+                        <Send className="h-4 w-4 mr-2" />
+                        Add Comment
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -282,7 +307,7 @@ export function IssueDetail() {
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Status</label>
                   <Select
-                    value={status}
+                    value={issue.status}
                     onValueChange={(value: IssueStatus) => setStatus(value)}
                   >
                     <SelectTrigger>
@@ -297,25 +322,23 @@ export function IssueDetail() {
                     </SelectContent>
                   </Select>
                 </div>
-
-                {/* Assignee Selector */}
-                {/*<div className="space-y-2">*/}
-                {/*  <label className="text-sm font-medium">Assignee</label>*/}
-                {/*  <Select value={assigneeId} onValueChange={setAssigneeId}>*/}
-                {/*    <SelectTrigger>*/}
-                {/*      <SelectValue placeholder="Select assignee" />*/}
-                {/*    </SelectTrigger>*/}
-                {/*    <SelectContent>*/}
-                {/*      <SelectItem value="unassigned">Unassigned</SelectItem>*/}
-                {/*      {mockUsers.map((user) => (*/}
-                {/*        <SelectItem key={user.id} value={user.id}>*/}
-                {/*          {user.name}*/}
-                {/*        </SelectItem>*/}
-                {/*      ))}*/}
-                {/*    </SelectContent>*/}
-                {/*  </Select>*/}
-                {/*</div>*/}
-
+                Assignee Selector
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Assigned To</label>
+                  <Select value={assignedToId} onValueChange={setAssignedToId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select assignee" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="unassigned">Unassigned</SelectItem>
+                      {users.map((user: UserType) => (
+                        <SelectItem key={user.id} value={user.id}>
+                          {user.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <Button className="w-full bg-blue-600 hover:bg-blue-700">
                   Save Changes
                 </Button>
@@ -329,7 +352,7 @@ export function IssueDetail() {
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Assignee:</span>
+                  <span className="text-muted-foreground">Assigned To:</span>
                   <div className="flex items-center space-x-1">
                     <User className="h-3 w-3" />
                     <span>
@@ -340,10 +363,9 @@ export function IssueDetail() {
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Status:</span>
                   <Badge
-                    variant={getStatusBadgeVariant(status)}
-                    className="text-xs"
+                    className={`text-xs ${getStatusBadgeColor(issue.status)}`}
                   >
-                    {status.replace("-", " ")}
+                    {issue.status.replace("-", " ")}
                   </Badge>
                 </div>
                 <div className="flex items-center justify-between text-sm">
@@ -363,14 +385,13 @@ export function IssueDetail() {
           </div>
         </div>
       </main>
-
-      {/* Edit Modal */}
-      {/*<IssueModal*/}
-      {/*  open={isEditModalOpen}*/}
-      {/*  onOpenChange={setIsEditModalOpen}*/}
-      {/*  issue={issue}*/}
-      {/*  onSave={handleEditIssue}*/}
-      {/*/>*/}
+      Edit Modal
+      <IssueModal
+        open={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        issue={issue}
+        onSave={handleEditIssue}
+      />
     </div>
   );
 }
