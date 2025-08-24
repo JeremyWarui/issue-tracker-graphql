@@ -100,13 +100,6 @@ export function IssuesList() {
         },
       });
     }
-
-    // await updateIssueStatus( {
-    //   variables: {
-    //     id: issueData.id,
-    //     status: issueData.status
-    //   }
-    // } )
   };
 
   const openEditModal = (issue: Issue) => {
