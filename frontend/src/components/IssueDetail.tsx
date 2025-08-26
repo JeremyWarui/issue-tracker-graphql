@@ -410,6 +410,7 @@ export function IssueDetail() {
         open={isEditModalOpen}
         onOpenChange={setIsEditModalOpen}
         issue={issue}
+        users={users}
         onSave={handleEditIssue}
       />
     </div>
