@@ -127,7 +127,7 @@ export function IssueDetail() {
     await addComment({ 
       variables: { 
         content: newComment,
-        author: "u2b3c4d5-e6f7-8901-1121-314151617181",
+        author: "68ae15845ed0cb123cc74dc2",
         issueId: issue.id,
       }
     });
