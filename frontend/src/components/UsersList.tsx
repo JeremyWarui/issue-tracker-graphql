@@ -72,8 +72,15 @@ export function UsersList() {
       <div className="space-y-6">
         {/* Top Bar */}
         <Card className="bg-white">
-          <CardHeader>
-            <CardTitle className="text-lg">User Management</CardTitle>
+          <CardHeader className={"flex flex-row justify-between"}>
+            <CardTitle className="text-2xl">User Management</CardTitle>
+            <Button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="w-fit bg-blue-600 hover:bg-blue-700"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Create User
+            </Button>
           </CardHeader>
           </Card>
 
