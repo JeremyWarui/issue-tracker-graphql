@@ -113,20 +113,27 @@ export function IssuesList() {
     <PageLayout
       title="Issues"
       subtitle="Track and manage all project issues"
-      headerAction={
-        <Button
-          onClick={() => setIsCreateModalOpen(true)}
-          className="w-fit bg-blue-600 hover:bg-blue-700"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Create Issue
-        </Button>
-      }
+      // headerAction={
+      //   <Button
+      //     onClick={() => setIsCreateModalOpen(true)}
+      //     className="w-fit bg-blue-600 hover:bg-blue-700"
+      //   >
+      //     <Plus className="h-4 w-4 mr-2" />
+      //     Create Issue
+      //   </Button>
+      // }
     >
       <div className="space-y-6">
         <Card className="bg-white">
-          <CardHeader>
+          <CardHeader className={"flex flex-row justify-between"}>
             <CardTitle className="text-2xl">Issue Management</CardTitle>
+            <Button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="w-fit bg-blue-600 hover:bg-blue-700"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Create Issue
+            </Button>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4">
