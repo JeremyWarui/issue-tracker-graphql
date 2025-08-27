@@ -70,8 +70,30 @@ export const resolvers = {
         name: args.name,
         email: args.email
       });
+
+      try {
+        await user.save();
+      } catch ( error ) {
+        throw new GraphQLError("saving person failed", {
+          extensions: { code : "BAD_USER_INPUT", invalidArgs: args.name, error }
+        })
+      }
       
-      return await user.save();
+      return user
+    },
+    // - delete user
+    deleteUser: async (_: any, args: { id: string }): Promise<any> => {
+      const userId: string = args.id
+      if(!userId) throw new GraphQLError("user id must be input", {
+        extensions: { code: "BAD_USER_INPUT"}
+      })
+      try {
+        return await User.findOneAndDelete({ _id: userId });
+      } catch ( error ) {
+        throw new GraphQLError("user not found", {
+          extensions: { code: "NOT_FOUND" }
+        })
+      }
     },
     // - createIssue
     createIssue: async (
@@ -94,8 +116,19 @@ export const resolvers = {
         updatedAt: new Date().toISOString(),
         assignedTo: null
       });
+
+      try {
+        await issue.save()
+      } catch ( error ) {
+        throw new GraphQLError("failed to save the issue", {
+          extensions: {
+            code: "BAD_USER_INPUT",
+            error
+          }
+        })
+      }
       
-      return await issue.save();
+      return issue;
     },
     // - assignIssue
     assignIssue: async (_: any, args: { id: string; userId: string }): Promise<any> => {

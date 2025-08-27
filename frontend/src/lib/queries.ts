@@ -86,7 +86,39 @@ export const ALL_USERS = gql`
         }
     }
     ${USER_INFO}
+`
 
+export const GET_USER = gql`
+    query user($id: String!) {
+        user(id: $id) {
+            ...UserInfo
+            assignedIssues {
+                id
+            }
+        }
+    }
+    ${USER_INFO}
+`
+
+export const CREATE_USER = gql`
+    mutation addUser($name: String!, $email: String!) {
+        createUser(name: $name, email: $email) {
+            ...UserInfo
+            assignedIssues {
+                id
+            }
+        }
+    }
+    ${USER_INFO}
+`
+
+export const DELETE_USER  = gql`
+    mutation deleteUser($id: ID!) {
+        deleteUser(id: $id) {
+            ...UserInfo
+        }
+    }
+    ${USER_INFO}
 `
 
 export const CREATE_ISSUE = gql`

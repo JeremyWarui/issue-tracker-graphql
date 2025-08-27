@@ -33,6 +33,10 @@ export const typeDefs = `
       createdAt: String!
     }
     
+    type Token {
+      value: String!
+    }
+    
     type Query {
       dummy: String!
       issuesCount(status: String): Int!
@@ -40,6 +44,7 @@ export const typeDefs = `
       issue(id: ID!): Issue!
       users: [User!]!
       user(id: ID!): User!
+      me: User
     }
     
     type Mutation {
@@ -47,6 +52,7 @@ export const typeDefs = `
         name: String!
         email: String!
       ): User!
+      deleteUser(id: ID!): User!
       createIssue(
         title: String!
         description: String!
@@ -64,5 +70,9 @@ export const typeDefs = `
         author: String!
         issueId: String!
       ): Comment!
+      login(
+        name: String!
+        password: String!
+      ): Token
     }
 `;

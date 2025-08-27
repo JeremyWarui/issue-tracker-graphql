@@ -11,8 +11,8 @@ import { Plus, UserIcon, Mail, Edit, Trash2 } from "lucide-react";
 
 
 // use data from GraphQL
-import { useQuery } from "@apollo/client/react";
-import { ALL_USERS } from "@/lib/queries.ts";
+import { useQuery, useMutation } from "@apollo/client/react";
+import { ALL_USERS, CREATE_USER, DELETE_USER } from "@/lib/queries.ts";
 
 export function UsersList() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -21,6 +21,17 @@ export function UsersList() {
 
   //fetch users and issues
   const { loading, error, data } = useQuery(ALL_USERS);
+
+  // CREATE USER
+  const [ createUser ] = useMutation(CREATE_USER, {
+    refetchQueries: [{ query: ALL_USERS }],
+  })
+
+  // delete user
+  const [ deleteUser ] = useMutation(DELETE_USER, {
+    refetchQueries: [{ query: ALL_USERS }],
+  })
+
   if (loading) return "loading...";
   if (error) return `Error! ${error.message}`;
 
@@ -38,6 +49,7 @@ export function UsersList() {
   const handleCreateUser = async (userData: Partial<User>) => {
     console.log("Creating user:", userData);
     // In a real app, this would make an API call to create the user
+    await createUser( { variables: { ...userData } } )
   };
 
   const handleEditUser = async (userData: Partial<User>) => {
@@ -50,9 +62,10 @@ export function UsersList() {
     setIsEditModalOpen(true);
   };
 
-  const handleDeleteUser = (userId: string) => {
+  const handleDeleteUser = async (userId: string) => {
     console.log("Deleting user:", userId);
     // In a real app, this would show a confirmation dialog and then delete the user
+    await deleteUser({ variables: { id: userId }})
   };
 
   return (
@@ -157,9 +170,9 @@ export function UsersList() {
                           <span className="text-foreground font-medium">
                             {user.name}
                           </span>
-                          {user.assignedIssues.length > 0 && (
+                          {user.assignedIssues && (
                             <Badge variant="secondary" className="text-xs">
-                              {user.assignedIssues.length} issue
+                              {user.assignedIssues ? user.assignedIssues.length : 0 } issue
                               {user.assignedIssues.length !== 1 ? "s" : ""}
                             </Badge>
                           )}
