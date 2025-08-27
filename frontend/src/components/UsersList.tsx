@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PageLayout } from "./PageLayout";
 import { UserModal } from "./UserModal";
+import { LoadingUsers } from "@/components/loading";
 import type { User } from "../lib/types";
 import { Plus, UserIcon, Mail, Edit, Trash2 } from "lucide-react";
 
@@ -32,7 +33,7 @@ export function UsersList() {
     refetchQueries: [{ query: ALL_USERS }],
   })
 
-  if (loading) return "loading...";
+  if (loading) return <LoadingUsers />;
   if (error) return `Error! ${error.message}`;
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment

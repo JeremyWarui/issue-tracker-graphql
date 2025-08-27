@@ -29,6 +29,7 @@ import {
   CREATE_ISSUE,
   UPDATE_ISSUE_STATUS,
 } from "@/lib/queries.ts";
+import { LoadingIssuesList } from "@/components/loading";
 // create issue or update issue
 
 export function IssuesList() {
@@ -53,7 +54,7 @@ export function IssuesList() {
     refetchQueries: [{ query: ALL_ISSUES_AND_USERS }],
   });
 
-  if (loading) return "loading...";
+  if (loading) return <LoadingIssuesList />;
   if (error) return `Error! ${error.message}`;
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment

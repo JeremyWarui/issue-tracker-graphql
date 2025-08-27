@@ -40,6 +40,7 @@ import {
   UPDATE_ISSUE_STATUS
 } from "@/lib/queries.ts";
 import { STATUS_OPTIONS, getStatusBadgeColor } from "@/lib/utils";
+import { LoadingIssue } from "@/components/loading";
 
 export function IssueDetail() {
   // State for editing
@@ -79,7 +80,7 @@ export function IssueDetail() {
     }
   }, [data]);
 
-  if (loading) return "loading...";
+  if (loading) return <LoadingIssue />;
   if (error) return `Error! ${error.message}`;
   if (!data) return null;
 

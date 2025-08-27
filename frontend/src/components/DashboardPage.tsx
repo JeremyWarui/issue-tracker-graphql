@@ -15,6 +15,7 @@ import { getStatusBadgeColor } from "@/lib/utils";
 import { useQuery } from "@apollo/client/react";
 import { ALL_ISSUES_AND_USERS } from "@/lib/queries.ts";
 import type { Issue } from "@/lib/types.ts";
+import { LoadingDashboard } from "@/components/loading";
 
 function getStatusIcon(status: string) {
   switch (status) {
@@ -35,7 +36,7 @@ function getStatusIcon(status: string) {
 
 export function Dashboard() {
   const { loading, error, data } = useQuery(ALL_ISSUES_AND_USERS);
-  if (loading) return "loading...";
+  if (loading) return <LoadingDashboard />;
   if (error) return `Error! ${error.message}`;
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
