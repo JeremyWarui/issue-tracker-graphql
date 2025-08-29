@@ -28,11 +28,11 @@ export function SignUpForm() {
   };
 
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10 bg-blue-50">
-      <div className="w-full max-w-lg flex flex-col gap-6 p-12">
-        <Card className="bg-white">
+    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+      <div className="w-full max-w-sm flex flex-col gap-6">
+        <Card>
           <CardHeader>
-            <CardTitle className="bold">Create an account</CardTitle>
+            <CardTitle>Create an account</CardTitle>
             <CardDescription>
               Enter your information below to create your account
             </CardDescription>
@@ -46,7 +46,6 @@ export function SignUpForm() {
                     id="name"
                     type="text"
                     placeholder="John Doe"
-                    className="bg-gray-100"
                     required
                   />
                 </div>
@@ -55,28 +54,17 @@ export function SignUpForm() {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="johndoe@example.com"
-                    className="bg-gray-100"
+                    placeholder="m@example.com"
                     required
                   />
                 </div>
                 <div className="grid gap-3">
                   <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    required
-                    className="bg-gray-100"
-                  />
+                  <Input id="password" type="password" required />
                 </div>
                 <div className="grid gap-3">
                   <Label htmlFor="confirmPassword">Confirm Password</Label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    required
-                    className="bg-gray-100"
-                  />
+                  <Input id="confirmPassword" type="password" required />
                 </div>
                 <Button type="submit" className="w-full">
                   Create Account
@@ -85,11 +73,11 @@ export function SignUpForm() {
               <div className="mt-4 text-center text-sm">
                 Already have an account?{" "}
                 <a
-                  href="/signup"
+                  href="#"
                   onClick={handleSignInClick}
-                  className="underline underline-offset-4 font-bold"
+                  className="underline underline-offset-4"
                 >
-                  Log in
+                  Sign in
                 </a>
               </div>
             </form>
