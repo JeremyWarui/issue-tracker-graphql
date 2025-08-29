@@ -73,15 +73,6 @@ export function UsersList() {
     <PageLayout 
       title="Users" 
       subtitle="Manage team members and user accounts"
-      headerAction={
-        <Button
-          onClick={() => setIsCreateModalOpen(true)}
-          className="w-fit bg-blue-600 hover:bg-blue-700"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Create User
-        </Button>
-      }
     >
       <div className="space-y-6">
         {/* Top Bar */}
