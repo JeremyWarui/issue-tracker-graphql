@@ -33,11 +33,11 @@ export function LoginForm() {
             <form onSubmit={handleSubmit}>
               <div className="flex flex-col gap-6">
                 <div className="grid gap-3">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="name">Name</Label>
                   <Input
-                    id="email"
-                    type="email"
-                    placeholder="m@example.com"
+                    id="name"
+                    type="name"
+                    placeholder="John Doe"
                     required
                     className="bg-gray-100"
                   />
@@ -45,12 +45,6 @@ export function LoginForm() {
                 <div className="grid gap-3">
                   <div className="flex items-center">
                     <Label htmlFor="password">Password</Label>
-                    <a
-                      href="#"
-                      className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                    >
-                      Forgot your password?
-                    </a>
                   </div>
                   <Input id="password" type="password" required  className="bg-gray-100"/>
                 </div>
@@ -60,7 +54,7 @@ export function LoginForm() {
               </div>
               <div className="mt-4 text-center text-sm">
                 Don&apos;t have an account?{" "}
-                <a href="#" className="underline underline-offset-4">
+                <a href="/signup" className="underline underline-offset-4 font-bold">
                   Sign up
                 </a>
               </div>
