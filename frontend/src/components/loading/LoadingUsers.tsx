@@ -7,11 +7,19 @@ export default function LoadingUsers() {
       <header className="border-b bg-white shadow-sm">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div>
+            <div className="">
               <div className="h-8 w-32 bg-gray-200 animate-pulse rounded mb-1" aria-hidden="true" />
               <div className="h-4 w-64 bg-gray-200 animate-pulse rounded" aria-hidden="true" />
             </div>
-            <Navigation />
+            <div className="flex-1 flex justify-center">
+              <Navigation />
+            </div>
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3">
+                <div className="h-4 w-24 bg-gray-200 animate-pulse rounded" aria-hidden="true" />
+                <div className="h-8 w-16 bg-gray-200 animate-pulse rounded" aria-hidden="true" />
+              </div>
+            </div>
           </div>
         </div>
       </header>
