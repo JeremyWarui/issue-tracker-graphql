@@ -16,6 +16,7 @@ import { useQuery, useMutation } from "@apollo/client/react";
 import { GET_USER_ASSIGNMENTS, UPDATE_ISSUE_STATUS } from "@/lib/queries.ts";
 import { LoadingIssuesList } from "@/components/loading";
 import { useUser } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 export function MyIssues() {
   const { user } = useUser();
@@ -24,36 +25,56 @@ export function MyIssues() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingIssue, setEditingIssue] = useState<Issue | null>(null);
 
-  const { loading, error, data } = useQuery<{ issues: Issue[] }>(GET_USER_ASSIGNMENTS, {
-    variables: { userId: user?.id },
-    skip: !user?.id,
-  });
+  const { loading, error, data } = useQuery<{ issues: Issue[] }>(
+    GET_USER_ASSIGNMENTS,
+    {
+      variables: { userId: user?.id },
+      skip: !user?.id,
+    }
+  );
 
   const [updateIssueStatus] = useMutation(UPDATE_ISSUE_STATUS, {
-    refetchQueries: [{ query: GET_USER_ASSIGNMENTS, variables: { userId: user?.id } }],
+    refetchQueries: [
+      { query: GET_USER_ASSIGNMENTS, variables: { userId: user?.id } },
+    ],
   });
 
   if (loading) return <LoadingIssuesList />;
-  if (error) return `Error! ${error.message}`;
-  if (!user) return <div>Please log in to view your issues.</div>;
+  if (error) {
+    toast.error(`Error! ${error.message}`)
+    return `Error! ${error.message}`;
+  }
+  if (!user) {
+    toast.error("Please log in to view your issues.")
+    return <div>Please log in to view your issues.</div>;
+  } 
 
   const issues = data?.issues ?? [];
 
   const filteredIssues = issues.filter((issue: Issue) => {
-    const matchesSearch =
-      issue.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = issue.title
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
     const matchesStatus =
       statusFilter === "all" || issue.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   const handleEditIssue = async (issueData: Partial<Issue>) => {
-    if (issueData.status !== "OPEN") {
-      await updateIssueStatus({
-        variables: {
-          id: issueData.id,
-          status: issueData.status,
-        },
+    try {
+      if (issueData.status !== "OPEN") {
+        await updateIssueStatus({
+          variables: {
+            id: issueData.id,
+            status: issueData.status,
+          },
+        });
+      }
+
+      toast.success("Issue status updated successfully");
+    } catch (error) {
+      toast.error("Failed to update issue status. Please try again", {
+        description: `Error occurred: ${error}`,
       });
     }
   };
@@ -64,10 +85,7 @@ export function MyIssues() {
   };
 
   return (
-    <PageLayout
-      title="My Issues"
-      subtitle={`Issues assigned to ${user.name}`}
-    >
+    <PageLayout title="My Issues" subtitle={`Issues assigned to ${user.name}`}>
       <div className="space-y-6">
         <Card className="bg-white">
           <CardHeader>
@@ -89,8 +107,14 @@ export function MyIssues() {
                 {STATUS_OPTIONS_WITH_ALL.map((option) => (
                   <Button
                     key={option.value}
-                    variant={statusFilter === option.value ? "default" : "outline"}
-                    className={statusFilter === option.value ? "bg-blue-600 hover:bg-blue-700" : ""}
+                    variant={
+                      statusFilter === option.value ? "default" : "outline"
+                    }
+                    className={
+                      statusFilter === option.value
+                        ? "bg-blue-600 hover:bg-blue-700"
+                        : ""
+                    }
                     size="sm"
                     onClick={() => setStatusFilter(option.value)}
                   >
@@ -112,7 +136,7 @@ export function MyIssues() {
             {filteredIssues.length === 0 ? (
               <div className="text-center py-8">
                 <p className="text-muted-foreground">
-                  {searchQuery || statusFilter !== "all" 
+                  {searchQuery || statusFilter !== "all"
                     ? "No issues found matching your criteria."
                     : "You have no assigned issues."}
                 </p>
@@ -129,13 +153,20 @@ export function MyIssues() {
                         <h3 className="font-medium text-foreground truncate">
                           {issue.title}
                         </h3>
-                        <Badge className={`text-xs ${getStatusBadgeColor(issue.status)}`}>
+                        <Badge
+                          className={`text-xs ${getStatusBadgeColor(
+                            issue.status
+                          )}`}
+                        >
                           {issue.status.replace("-", " ")}
                         </Badge>
                       </div>
                       <div className="flex items-center space-x-4 mt-2 text-sm text-muted-foreground">
                         <span>
-                          Updated {formatDistanceToNow(issue.updatedAt, { addSuffix: true })}
+                          Updated{" "}
+                          {formatDistanceToNow(issue.updatedAt, {
+                            addSuffix: true,
+                          })}
                         </span>
                       </div>
                     </div>

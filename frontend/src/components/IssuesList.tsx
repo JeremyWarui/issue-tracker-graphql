@@ -30,6 +30,7 @@ import {
   UPDATE_ISSUE_STATUS,
 } from "@/lib/queries.ts";
 import { LoadingIssuesList } from "@/components/loading";
+import { toast } from "sonner"
 // create issue or update issue
 
 export function IssuesList() {
@@ -78,19 +79,29 @@ export function IssuesList() {
 
   const handleCreateIssue = async (issueData: Partial<Issue>) => {
     console.log("Creating issue:", issueData);
-    await createIssue({ variables: { ...issueData } });
+    try {
+      await createIssue({ variables: { ...issueData } });
+      toast.success("Issue created successfully!")
+    } catch (error) {
+      toast.error("Failed to create issue.Please try again.", {
+        description: `error occured ${error}`
+      })
+    }
+    
   };
 
   const handleEditIssue = async (issueData: Partial<Issue>) => {
     console.log("Updating issue:", issueData);
     console.log("issue status: ", issueData.status);
-    if (issueData.status === "OPEN") {
+    try {
+      if (issueData.status === "OPEN") {
       await assignIssue({
         variables: {
           id: issueData.id,
           userId: issueData.assignedTo?.id,
         },
       });
+      toast.success("Issue assigned successfully")
     }
 
     if (issueData.status !== "OPEN") {
@@ -100,7 +111,15 @@ export function IssuesList() {
           status: issueData.status,
         },
       });
+      toast.success("Issue status updated successfully!")
     }
+
+    } catch(error) {
+      toast.error("Failed to update issue. Please try again", {
+        description: `Error: ${error}`
+      })
+    }
+    
   };
 
   const openEditModal = (issue: Issue) => {

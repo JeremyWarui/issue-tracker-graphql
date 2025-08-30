@@ -35,18 +35,20 @@ import {
 import { formatDistanceToNow, format } from "date-fns";
 import { useMutation, useQuery } from "@apollo/client/react";
 import {
-  ALL_ISSUES_AND_USERS, ASSIGN_ISSUE,
+  ALL_ISSUES_AND_USERS,
+  ASSIGN_ISSUE,
   CREATE_COMMENT,
   GET_ISSUE,
-  UPDATE_ISSUE_STATUS
+  UPDATE_ISSUE_STATUS,
 } from "@/lib/queries.ts";
 import { STATUS_OPTIONS, getStatusBadgeColor } from "@/lib/utils";
 import { LoadingIssue } from "@/components/loading";
 import { useUser } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 export function IssueDetail() {
   // State for editing
-  const { user } = useUser()
+  const { user } = useUser();
   const [status, setStatus] = useState<IssueStatus>("OPEN");
   const [assignedToId, setAssignedToId] = useState("");
   const [newComment, setNewComment] = useState("");
@@ -67,22 +69,22 @@ export function IssueDetail() {
   // Find the issue by ID
 
   const { loading, error, data } = useQuery<IssueQueryData>(GET_ISSUE, {
-    variables: { id }
+    variables: { id },
   });
 
   // create comment to API
-  const [ addComment ] = useMutation(CREATE_COMMENT, {
-    refetchQueries: [ { query: ALL_ISSUES_AND_USERS }]
-  })
+  const [addComment] = useMutation(CREATE_COMMENT, {
+    refetchQueries: [{ query: ALL_ISSUES_AND_USERS }],
+  });
 
   // assign issue
-  const [ assignIssue ] = useMutation( ASSIGN_ISSUE, {
-    refetchQueries: [ { query: ALL_ISSUES_AND_USERS } ]
-  } )
+  const [assignIssue] = useMutation(ASSIGN_ISSUE, {
+    refetchQueries: [{ query: ALL_ISSUES_AND_USERS }],
+  });
   // update status of issue
-  const [ updateIssueStatus ] = useMutation( UPDATE_ISSUE_STATUS, {
-    refetchQueries: [ { query: ALL_ISSUES_AND_USERS } ]
-  } )
+  const [updateIssueStatus] = useMutation(UPDATE_ISSUE_STATUS, {
+    refetchQueries: [{ query: ALL_ISSUES_AND_USERS }],
+  });
 
   useEffect(() => {
     if (data?.issue) {
@@ -124,7 +126,9 @@ export function IssueDetail() {
               <div className="flex items-center space-x-4">
                 {user && (
                   <div className="flex items-center space-x-3">
-                    <span className="text-sm text-gray-600">Welcome, {user.name}</span>
+                    <span className="text-sm text-gray-600">
+                      Welcome, {user.name}
+                    </span>
                     <Button
                       variant="outline"
                       size="sm"
@@ -158,14 +162,21 @@ export function IssueDetail() {
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
 
-    await addComment({ 
-      variables: { 
-        content: newComment,
-        author: user?.id,
-        issueId: issue.id,
-      }
-    });
-    setNewComment("");
+    try {
+      await addComment({
+        variables: {
+          content: newComment,
+          author: user?.id,
+          issueId: issue.id,
+        },
+      });
+      setNewComment("");
+      toast.success("Comment added successfully!");
+    } catch (error) {
+      toast.error("Failed to add comment. Please try again", {
+        description: `Error: ${error}`,
+      });
+    }
   };
 
   const handleEditIssue = async () => {
@@ -180,23 +191,28 @@ export function IssueDetail() {
 
     console.log("Updating issue:", issueData);
 
-    await assignIssue({
+    try {
+      await assignIssue({
         variables: {
           id: issueData.id,
           userId: issueData.assignedTo?.id,
         },
-    });
-  
-    if (issueData.status !== "OPEN") {
-      await updateIssueStatus({
-        variables: {
-          id: issueData.id,
-          status: issueData.status,
-        },
+      });
+
+      if (issueData.status !== "OPEN") {
+        await updateIssueStatus({
+          variables: {
+            id: issueData.id,
+            status: issueData.status,
+          },
+        });
+      }
+    } catch (error) {
+      toast.error("Failed to update issue. Please try again.", {
+        description: `Error occurred: ${error}`,
       });
     }
   };
-
 
   const assignedUser = users.find(
     (user: UserType) => user.id === issue.assignedTo?.id
@@ -231,7 +247,9 @@ export function IssueDetail() {
             <div className="flex items-center space-x-4">
               {user && (
                 <div className="flex items-center space-x-3">
-                  <span className="text-sm text-gray-600">Welcome, {user.name}</span>
+                  <span className="text-sm text-gray-600">
+                    Welcome, {user.name}
+                  </span>
                   <Button
                     variant="outline"
                     size="sm"
@@ -409,8 +427,9 @@ export function IssueDetail() {
                     </SelectContent>
                   </Select>
                 </div>
-                <Button className="w-full bg-blue-600 hover:bg-blue-700"
-                        onClick={ handleEditIssue }
+                <Button
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                  onClick={handleEditIssue}
                 >
                   Save Changes
                 </Button>
