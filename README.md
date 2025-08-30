@@ -1,5 +1,7 @@
 # 🛠️ GraphQL Issue Tracker Tutorial
 
+![Issue Tracker](./Images/Dashboard.png)
+
 Welcome to the GraphQL Issue Tracker Tutorial repository!
 This repo is designed as a step-by-step learning project where you’ll build a simple Issue Tracker application using GraphQL and React.
 
@@ -12,6 +14,7 @@ The goal is to:
 
 ## 📌 Project Overview
 
+![View of the list of issues](./Images/IssueList.png)
 The Issue Tracker app allows you to:
 
 - Create issues (title, description, status).
@@ -20,6 +23,8 @@ The Issue Tracker app allows you to:
 - Subscribe to real-time updates when issues change.
 
 This tutorial is structured for beginners to intermediate developers who want to gain practical hands-on experience with GraphQL.
+
+![View of the details of the issues, comments and status](./Images/IssueView.png)
 
 ---
 

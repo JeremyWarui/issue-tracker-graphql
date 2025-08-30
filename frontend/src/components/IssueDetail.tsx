@@ -42,16 +42,18 @@ import {
 } from "@/lib/queries.ts";
 import { STATUS_OPTIONS, getStatusBadgeColor } from "@/lib/utils";
 import { LoadingIssue } from "@/components/loading";
+import { useUser } from "@/contexts/AuthContext";
 
 export function IssueDetail() {
   // State for editing
+  const { user } = useUser()
   const [status, setStatus] = useState<IssueStatus>("OPEN");
   const [assignedToId, setAssignedToId] = useState("");
   const [newComment, setNewComment] = useState("");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   // User data for header
-  const user = { name: "Bob Smith" };
+  // const user = { name: "Bob Smith" };
 
   const handleLogout = () => {
     // logout()
@@ -159,7 +161,7 @@ export function IssueDetail() {
     await addComment({ 
       variables: { 
         content: newComment,
-        author: "68ae15845ed0cb123cc74dc2",
+        author: user?.id,
         issueId: issue.id,
       }
     });
@@ -455,7 +457,7 @@ export function IssueDetail() {
           </div>
         </div>
       </main>
-      Edit Modal
+      {/* Edit Modal */}
       <IssueModal
         open={isEditModalOpen}
         onOpenChange={setIsEditModalOpen}
