@@ -114,15 +114,6 @@ export function IssuesList() {
     <PageLayout
       title="Issues"
       subtitle="Track and manage all project issues"
-      // headerAction={
-      //   <Button
-      //     onClick={() => setIsCreateModalOpen(true)}
-      //     className="w-fit bg-blue-600 hover:bg-blue-700"
-      //   >
-      //     <Plus className="h-4 w-4 mr-2" />
-      //     Create Issue
-      //   </Button>
-      // }
     >
       <div className="space-y-6">
         <Card className="bg-white">

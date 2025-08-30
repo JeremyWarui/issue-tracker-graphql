@@ -15,6 +15,7 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { CREATE_USER } from "@/lib/queries";
 import { useMutation } from "@apollo/client/react";
+import { toast } from "sonner";
 
 export function SignUpForm() {
   const [name, setName] = useState("");
@@ -34,27 +35,23 @@ export function SignUpForm() {
         variables: { name, email, password },
       });
       console.log(success);
-      
+
       if (success) {
-        // toast({
-        //   title: "Account created",
-        //   description: "Welcome to the issue tracker!",
-        // })
+        toast.success("Account created successfully!", {
+          description: "Go ahead to login to your account",
+        });
         navigate("/");
       } else {
-        // toast({
-        //   title: "Signup failed",
-        //   description: "Unable to create account",
-        //   variant: "destructive",
-        // })
+        toast.warning("Signup failed, Try again");
       }
     } catch (error) {
-      console.log("error:", error.message);
-      // toast({
-      //   title: "Signup failed",
-      //   description: "An error occurred during signup",
-      //   variant: "destructive",
-      // })
+      if (error instanceof Error) {
+        console.log("error:", error.message);
+        toast.error(`${error.message}`);
+      } else {
+        console.log("error:", error);
+        toast.error(`${error}`);
+      }
     } finally {
       setIsLoading(false);
     }

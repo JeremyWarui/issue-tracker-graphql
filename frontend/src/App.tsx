@@ -8,6 +8,7 @@ import { SignUpForm } from "./components/RegisterPage";
 import { LoginForm } from "./components/LoginForm";
 import "./App.css";
 import { useUser } from "./contexts/AuthContext";
+import { Toaster } from "sonner";
 
 
 function App() {
@@ -37,6 +38,7 @@ function App() {
           </Routes>
         )}
       </div>
+      <Toaster richColors expand={true} position="top-center" />
     </Router>
   );
 }
