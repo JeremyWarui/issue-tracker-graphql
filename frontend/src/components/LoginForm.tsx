@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import {
@@ -13,19 +13,47 @@ import {
 } from "./ui/card";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import { LOGIN_USER } from "@/lib/queries";
+import { useMutation } from "@apollo/client/react";
 
-export function LoginForm() {
+interface LoginFormProps {
+  setToken: (token: string) => void;
+}
+
+interface LoginMutationResult {
+  login: {
+    value: string;
+  };
+}
+
+export function LoginForm({ setToken }: LoginFormProps) {
   const [name, setName] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate();
 
+  const [ login, result ] = useMutation<LoginMutationResult>(LOGIN_USER)
+
+  useEffect(() => {
+    if (result.data) {
+      const token = result.data?.login?.value
+      console.log("login form token: ", token);
+      
+      setToken(token)
+      localStorage.setItem("issuesTrackerUser", token)
+    }
+  }, [result.data])
+
+  
    const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
 
     try {
-      // const success = await login(name, password)
+      const success = await login({ variables: { name, identifier: password }})
+      console.log(success);
+
+      
       if (success) {
         // toast({
         //   title: "Login successful",
@@ -40,7 +68,11 @@ export function LoginForm() {
         // })
       }
     } catch (error) {
-      console.log("error:", error.message)
+      if (error instanceof Error) {
+        console.log("error:", error.message)
+      } else {
+        console.log("error:", error)
+      }
       // toast({
       //   title: "Login failed",
       //   description: "An error occurred during login",

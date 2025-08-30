@@ -1,6 +1,7 @@
 import { Navigation } from "./NavigationBar";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
+import { useUser } from "@/contexts/AuthContext";
 
 interface PageLayoutProps {
   title: string;
@@ -9,12 +10,16 @@ interface PageLayoutProps {
   headerAction?: React.ReactNode;
 }
 
-export function PageLayout({ title, subtitle, children, headerAction }: PageLayoutProps) {
-  const user = { name: "Bob Smith" };
+export function PageLayout({
+  title,
+  subtitle,
+  children,
+  headerAction,
+}: PageLayoutProps) {
+  const { user, logout } = useUser();
 
   const handleLogout = () => {
-    // logout()
-    console.log("logout button clicked!");
+    logout();
   };
 
   return (
@@ -33,7 +38,9 @@ export function PageLayout({ title, subtitle, children, headerAction }: PageLayo
               {headerAction}
               {user && (
                 <div className="flex items-center space-x-3">
-                  <span className="text-md text-gray-800 font-bold">Welcome, {user.name}</span>
+                  <span className="text-md text-gray-800 font-bold">
+                    Welcome, {user.name}
+                  </span>
                   <Button
                     variant="outline"
                     size="sm"
@@ -49,9 +56,7 @@ export function PageLayout({ title, subtitle, children, headerAction }: PageLayo
           </div>
         </div>
       </header>
-      <main className="container mx-auto px-6 py-8">
-        {children}
-      </main>
+      <main className="container mx-auto px-6 py-8">{children}</main>
     </div>
   );
 }

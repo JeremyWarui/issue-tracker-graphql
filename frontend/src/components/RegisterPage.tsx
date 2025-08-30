@@ -13,26 +13,34 @@ import {
 } from "./ui/card";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import { CREATE_USER } from "@/lib/queries";
+import { useMutation } from "@apollo/client/react";
 
 export function SignUpForm() {
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
+  const [createUser] = useMutation(CREATE_USER);
+
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
 
     try {
-      const success = await signup(name, email, password)
+      const success = await createUser({
+        variables: { name, email, password },
+      });
+      console.log(success);
+      
       if (success) {
         // toast({
         //   title: "Account created",
         //   description: "Welcome to the issue tracker!",
         // })
-        navigate("/")
+        navigate("/");
       } else {
         // toast({
         //   title: "Signup failed",
@@ -41,23 +49,25 @@ export function SignUpForm() {
         // })
       }
     } catch (error) {
-       console.log("error:", error.message)
+      console.log("error:", error.message);
       // toast({
       //   title: "Signup failed",
       //   description: "An error occurred during signup",
       //   variant: "destructive",
       // })
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
-   <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
       <Card className="w-full max-w-md bg-white">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Sign Up</CardTitle>
-          <CardDescription>Create an account to start tracking issues</CardDescription>
+          <CardDescription>
+            Create an account to start tracking issues
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -94,13 +104,20 @@ export function SignUpForm() {
                 placeholder="Create a password"
               />
             </div>
-            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isLoading}>
+            <Button
+              type="submit"
+              className="w-full bg-blue-600 hover:bg-blue-700"
+              disabled={isLoading}
+            >
               {isLoading ? "Creating account..." : "Sign Up"}
             </Button>
           </form>
           <div className="mt-4 text-center text-sm">
             Already have an account?{" "}
-            <Link to="/login" className="text-blue-600 hover:underline font-bold">
+            <Link
+              to="/login"
+              className="text-blue-600 hover:underline font-bold"
+            >
               Log in
             </Link>
           </div>
