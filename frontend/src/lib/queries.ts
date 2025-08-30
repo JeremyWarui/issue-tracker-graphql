@@ -124,14 +124,10 @@ export const LOGIN_USER = gql`
 export const GET_CURRENT_USER = gql`
     query Me {
         me {
-            id
-            name
-            email
-            assignedIssues {
-                id
-            }
+            ...UserInfo
         }
     }
+    ${USER_INFO}
 `
 
 export const DELETE_USER  = gql`
@@ -206,10 +202,8 @@ export const GET_ISSUES_SUMMARY = gql`
 export const GET_USER_ASSIGNMENTS = gql`
     query getUserAssignments($userId: String!) {
         issues(assignedTo: $userId) {
-            id
-            title
-            status
-            updatedAt
+            ...IssueDetails
         }
     }
+    ${ISSUE_DETAIL}
 `

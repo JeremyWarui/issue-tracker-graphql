@@ -3,6 +3,7 @@ import { useQuery } from "@apollo/client/react";
 import { GET_CURRENT_USER } from "@/lib/queries";
 
 interface User {
+    id: string;
     name: string;
     email: string,
     assignedIssues: []
