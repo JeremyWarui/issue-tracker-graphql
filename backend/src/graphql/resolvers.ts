@@ -36,6 +36,9 @@ export const resolvers = {
     user: async (_: any, args: { id: string }): Promise<any> => {
       return User.findById(args.id).populate("assignedIssues");
     },
+    me: (_: any, args: any, context: any) => {
+      return context.currentUser
+    }
   },
   Issue: {
     comments: async (parent: any): Promise<any[]> => {
