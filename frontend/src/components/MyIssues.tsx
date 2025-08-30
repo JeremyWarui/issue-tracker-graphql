@@ -13,7 +13,11 @@ import { Search, Eye, Edit } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { STATUS_OPTIONS_WITH_ALL, getStatusBadgeColor } from "@/lib/utils";
 import { useQuery, useMutation } from "@apollo/client/react";
-import { GET_USER_ASSIGNMENTS, UPDATE_ISSUE_STATUS } from "@/lib/queries.ts";
+import {
+  GET_USER_ASSIGNMENTS,
+  UPDATE_ISSUE_STATUS,
+  ALL_ISSUES_AND_USERS,
+} from "@/lib/queries.ts";
 import { LoadingIssuesList } from "@/components/loading";
 import { useUser } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -36,29 +40,35 @@ export function MyIssues() {
   const [updateIssueStatus] = useMutation(UPDATE_ISSUE_STATUS, {
     refetchQueries: [
       { query: GET_USER_ASSIGNMENTS, variables: { userId: user?.id } },
+      { query: ALL_ISSUES_AND_USERS },
     ],
   });
 
   if (loading) return <LoadingIssuesList />;
   if (error) {
-    toast.error(`Error! ${error.message}`)
+    toast.error(`Error! ${error.message}`);
     return `Error! ${error.message}`;
   }
   if (!user) {
-    toast.error("Please log in to view your issues.")
+    toast.error("Please log in to view your issues.");
     return <div>Please log in to view your issues.</div>;
-  } 
+  }
 
   const issues = data?.issues ?? [];
 
-  const filteredIssues = issues.filter((issue: Issue) => {
-    const matchesSearch = issue.title
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-    const matchesStatus =
-      statusFilter === "all" || issue.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  const filteredIssues = issues
+    .filter((issue: Issue) => {
+      const matchesSearch = issue.title
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
+      const matchesStatus =
+        statusFilter === "all" || issue.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    })
+    .sort(
+      (a: Issue, b: Issue) =>
+        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    );
 
   const handleEditIssue = async (issueData: Partial<Issue>) => {
     try {

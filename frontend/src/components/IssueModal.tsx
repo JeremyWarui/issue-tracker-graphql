@@ -21,6 +21,7 @@ import {
 import { Label } from "@/components/ui/label";
 import type { Issue, IssueStatus, User } from "@/lib/types";
 import { STATUS_OPTIONS } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface IssueModalProps {
   open: boolean;
@@ -77,6 +78,7 @@ export function IssueModal({
 
   const handleSave = async () => {
     if ((!isStatusOnlyMode && !title.trim()) || !description.trim()) {
+      toast.error("Please fill in all required fields");
       return;
     }
 
@@ -106,7 +108,10 @@ export function IssueModal({
       onSave(issueData);
       onOpenChange(false);
     } catch (error) {
-      console.error("Error saving issue:", error);
+      // console.error("Error saving issue:", error);
+      toast.error("Failed to save issue. Please try again.", {
+        description: `Error: ${error}`,
+      });
     } finally {
       setIsLoading(false);
     }
