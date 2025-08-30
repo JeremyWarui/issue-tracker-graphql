@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Home, FileText, Users } from "lucide-react";
+// import { useAuth } from "../context/AuthContext"
+import { Home, FileText, Users, User } from "lucide-react";
 
 export function Navigation() {
   const location = useLocation();
@@ -38,12 +39,28 @@ export function Navigation() {
           Issues
         </Button>
       </Link>
+      <Link to="/my-issues">
+        <Button
+          variant={isActive("/my-issues") ? "default" : "ghost"}
+          size="sm"
+          className={
+            isActive("/my-issues")
+              ? "bg-blue-600 hover:bg-blue-700 text-white"
+              : ""
+          }
+        >
+          <User className="h-4 w-4 mr-2" />
+          My Issues
+        </Button>
+      </Link>
       <Link to="/users">
         <Button
           variant={isActive("/users") ? "default" : "ghost"}
           size="sm"
           className={
-            isActive("/users") ? "bg-blue-600 hover:bg-blue-700 text-white" : ""
+            isActive("/users")
+              ? "bg-blue-600 hover:bg-blue-700 text-white"
+              : ""
           }
         >
           <Users className="h-4 w-4 mr-2" />

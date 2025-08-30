@@ -101,12 +101,30 @@ export const GET_USER = gql`
 `
 
 export const CREATE_USER = gql`
-    mutation addUser($name: String!, $email: String!) {
-        createUser(name: $name, email: $email) {
+    mutation addUser($name: String!, $email: String!, $password: String!) {
+        createUser(name: $name, email: $email, hashPwd: $password) {
             ...UserInfo
             assignedIssues {
                 id
             }
+        }
+    }
+    ${USER_INFO}
+`
+
+export const LOGIN_USER = gql`
+    mutation login($name: String!, $identifier: String!) {
+        login(name: $name, identifier: $identifier){
+            value
+        }
+    }
+
+`
+
+export const GET_CURRENT_USER = gql`
+    query Me {
+        me {
+            ...UserInfo
         }
     }
     ${USER_INFO}
@@ -184,10 +202,8 @@ export const GET_ISSUES_SUMMARY = gql`
 export const GET_USER_ASSIGNMENTS = gql`
     query getUserAssignments($userId: String!) {
         issues(assignedTo: $userId) {
-            id
-            title
-            status
-            updatedAt
+            ...IssueDetails
         }
     }
+    ${ISSUE_DETAIL}
 `

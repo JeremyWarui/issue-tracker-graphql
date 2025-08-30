@@ -1,7 +1,8 @@
 "use client";
 
 import type React from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react"
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import {
   Card,
@@ -12,78 +13,119 @@ import {
 } from "./ui/card";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import { LOGIN_USER } from "@/lib/queries";
+import { useMutation } from "@apollo/client/react";
 
-export function LoginForm() {
+interface LoginFormProps {
+  setToken: (token: string) => void;
+}
+
+interface LoginMutationResult {
+  login: {
+    value: string;
+  };
+}
+
+export function LoginForm({ setToken }: LoginFormProps) {
+  const [name, setName] = useState("")
+  const [password, setPassword] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Handle login logic here
-    console.log("Login form submitted");
-  };
-  const handleSignUpClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    navigate("/signup");
-  };
+  const [ login, result ] = useMutation<LoginMutationResult>(LOGIN_USER)
+
+  useEffect(() => {
+    if (result.data) {
+      const token = result.data?.login?.value
+      console.log("login form token: ", token);
+      
+      setToken(token)
+      localStorage.setItem("issuesTrackerUser", token)
+    }
+  }, [result.data])
+
+  
+   const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+
+    try {
+      const success = await login({ variables: { name, identifier: password }})
+      console.log(success);
+
+      
+      if (success) {
+        // toast({
+        //   title: "Login successful",
+        //   description: "Welcome back!",
+        // })
+        navigate("/")
+      } else {
+        // toast({
+        //   title: "Login failed",
+        //   description: "Invalid credentials. Try password: 'password'",
+        //   variant: "destructive",
+        // })
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        console.log("error:", error.message)
+      } else {
+        console.log("error:", error)
+      }
+      // toast({
+      //   title: "Login failed",
+      //   description: "An error occurred during login",
+      //   variant: "destructive",
+      // })
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <div className="flex flex-col gap-6">
-        <Card className="bg-white w-lg">
-          <CardHeader>
-            <CardTitle>Login to your account</CardTitle>
-            <CardDescription>
-              Enter your email below to login to your account
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit}>
-              <div className="flex flex-col gap-6">
-                <div className="grid gap-3">
-                  <Label htmlFor="name">Name</Label>
-                  <Input
-                    id="email"
-                    type="text"
-                    placeholder="John Doe"
-                    required
-                    className="bg-gray-100"
-                  />
-                </div>
-                <div className="grid gap-3">
-                  <div className="flex items-center">
-                    <Label htmlFor="password">Password</Label>
-                    <a
-                      href="#"
-                      className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                    >
-                      Forgot your password?
-                    </a>
-                  </div>
-                  <Input
-                    id="password"
-                    type="password"
-                    required
-                    className="bg-gray-100"
-                  />
-                </div>
-                <Button type="submit" className="w-full">
-                  Login
-                </Button>
-              </div>
-              <div className="mt-4 text-center text-sm">
-                Don&apos;t have an account?{" "}
-                <a
-                  href="#"
-                  onClick={handleSignUpClick}
-                  className="underline underline-offset-4 font-bold"
-                >
-                  Sign up
-                </a>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
+    <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-bold">Log In</CardTitle>
+          <CardDescription>Enter your credentials to access the issue tracker</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                placeholder="Enter your name"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                placeholder="Enter your password"
+              />
+            </div>
+            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isLoading}>
+              {isLoading ? "Logging in..." : "Log In"}
+            </Button>
+          </form>
+          <div className="mt-4 text-center text-sm">
+            Don't have an account?{" "}
+            <Link to="/signup" className="text-blue-600 hover:underline font-bold">
+              Sign up
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

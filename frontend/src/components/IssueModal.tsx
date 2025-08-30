@@ -28,6 +28,7 @@ interface IssueModalProps {
   issue?: Issue | null;
   users?: User[];
   onSave: (issueData: Partial<Issue>) => void;
+  editMode?: "full" | "status-only";
 }
 
 export function IssueModal({
@@ -36,6 +37,7 @@ export function IssueModal({
   issue,
   users = [],
   onSave,
+  editMode = "full",
 }: IssueModalProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -44,6 +46,7 @@ export function IssueModal({
   const [isLoading, setIsLoading] = useState(false);
 
   const isEditing = !!issue;
+  const isStatusOnlyMode = editMode === "status-only";
 
   // console.log("users passed on: ", users)
 
@@ -73,22 +76,30 @@ export function IssueModal({
   // console.log("assignedTo: ", assigneeId)
 
   const handleSave = async () => {
-    if (!title.trim() || !description.trim()) {
+    if ((!isStatusOnlyMode && !title.trim()) || !description.trim()) {
       return;
     }
-    const selectedUser = users.find((u) => u.id === assigneeId);
 
     setIsLoading(true);
 
-    const issueData: Partial<Issue> = {
-      title: title.trim(),
-      description: description.trim(),
-      status,
-      assignedTo: assigneeId === "unassigned" ? undefined : selectedUser,
-    };
+    let issueData: Partial<Issue>;
+    if (isStatusOnlyMode) {
+      issueData = {
+        id: issue?.id,
+        status,
+      };
+    } else {
+      const selectedUser = users.find((u) => u.id === assigneeId);
 
-    if (isEditing && issue) {
-      issueData.id = issue.id;
+      issueData = {
+        title: title.trim(),
+        description: description.trim(),
+        status,
+        assignedTo: assigneeId === "unassigned" ? undefined : selectedUser,
+      };
+      if (isEditing && issue) {
+        issueData.id = issue.id;
+      }
     }
 
     try {
@@ -162,26 +173,28 @@ export function IssueModal({
           </div>
 
           {/* Assignee Field */}
-          <div className="space-y-2">
-            <Label htmlFor="assignee">Assigned To</Label>
-            <Select
-              value={assigneeId}
-              onValueChange={setAssigneeId}
-              disabled={isLoading}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select assignee" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="unassigned">Unassigned</SelectItem>
-                {users.map((user: User) => (
-                  <SelectItem key={user.id} value={user.id}>
-                    {user.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {!isStatusOnlyMode && (
+            <div className="space-y-2">
+              <Label htmlFor="assignee">Assigned To</Label>
+              <Select
+                value={assigneeId}
+                onValueChange={setAssigneeId}
+                disabled={isLoading}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select assignee" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="unassigned">Unassigned</SelectItem>
+                  {users.map((user: User) => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </div>
 
         <DialogFooter>
