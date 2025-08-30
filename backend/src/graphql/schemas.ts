@@ -3,6 +3,7 @@ export const typeDefs = `
       id: ID!
       name: String!
       email: String!
+      hashPwd: String!
       assignedIssues: [Issue]
     }
     
@@ -51,6 +52,7 @@ export const typeDefs = `
       createUser(
         name: String!
         email: String!
+        hashPwd: String!
       ): User!
       deleteUser(id: ID!): User!
       createIssue(
@@ -72,7 +74,7 @@ export const typeDefs = `
       ): Comment!
       login(
         name: String!
-        password: String!
+        identifier: String!
       ): Token
     }
 `;
