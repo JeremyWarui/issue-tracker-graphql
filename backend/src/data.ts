@@ -1,5 +1,5 @@
 // data.js
-import type { Issue, User, Comment } from "./types";
+import type { Issue, User, Comment } from "./types.ts";
 
 // ========================
 // Users

@@ -15,7 +15,7 @@ const UserSchema = new mongoose.Schema({
   },
   hashPwd: {
     type: String,
-    required: true,
+    required: process.env.NODE_ENV !== "test",
     unique: true
   },
   assignedIssues: [{

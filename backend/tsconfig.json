@@ -5,10 +5,11 @@
     "target": "es2022",
     "module": "Node16",
     "strict": true,
-    "moduleResolution": "node",
+    "moduleResolution": "Node16",
+    // "isolatedModules": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "types": ["node"],
+    "types": ["node", "jest"],
     "allowImportingTsExtensions": true,
     "noEmit": true
   },
