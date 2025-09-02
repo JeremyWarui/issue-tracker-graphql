@@ -179,7 +179,7 @@ export const resolvers = {
 
       const issue = new Issue({
         title: args.title,
-        description: args.description,
+        description: args.description.trim(),
         status: "OPEN",
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
