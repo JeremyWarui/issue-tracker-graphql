@@ -37,23 +37,24 @@ afterAll(async () => {
 })
 
 describe("GraphQL issues API", () => {
-    it("fetches all issues", async () => {
-        const query = `{
+    describe("Tests for Queries", () => {
+        it("fetches all issues", async () => {
+            const query = `{
             issues {
                 id
                 title
                 status
             }
         }`
-        const response = await request(url).post("/").send({ query });
+            const response = await request(url).post("/").send({ query });
 
-        expect(response.status).toBe(200)
-        expect(response.body.data?.issues).toBeInstanceOf(Array);
-        expect(response.body.data.issues.length).toBeGreaterThan(0);
-    })
+            expect(response.status).toBe(200)
+            expect(response.body.data?.issues).toBeInstanceOf(Array);
+            expect(response.body.data.issues.length).toBeGreaterThan(0);
+        })
 
-    it("fetches issues with comments array", async () => {
-        const query = `{
+        it("fetches issues with comments array", async () => {
+            const query = `{
             issues {
                 id
                 assignedTo {
@@ -65,16 +66,16 @@ describe("GraphQL issues API", () => {
             }
         }
         `
-        const response = await request(url).post("/").send({ query });
+            const response = await request(url).post("/").send({ query });
 
-        expect(response.status).toBe(200);
-        expect(response.body.data?.issues[0]?.comments).toBeInstanceOf(Array)
-        expect(response.body.data?.issues[0]?.comments.length).toBeGreaterThanOrEqual(0)
-    })
+            expect(response.status).toBe(200);
+            expect(response.body.data?.issues[0]?.comments).toBeInstanceOf(Array)
+            expect(response.body.data?.issues[0]?.comments.length).toBeGreaterThanOrEqual(0)
+        })
 
 
-    it("fetches issues with assignedTo of first issue to be null", async () => {
-        const query = `{
+        it("fetches issues with assignedTo of first issue to be null", async () => {
+            const query = `{
             issues {
                 id
                 assignedTo {
@@ -83,36 +84,36 @@ describe("GraphQL issues API", () => {
             }
         }
         `
-        const response3 = await request(url).post("/").send({ query });
+            const response3 = await request(url).post("/").send({ query });
 
-        expect(response3.status).toBe(200);
-        // expect(Object.keys(response3.body.data?.issues[0]?.assignedTo)).toContain("id")
-        expect(response3.body.data?.issues[0]?.assignedTo).toBeDefined()
-        expect(response3.body.data?.issues[0]?.assignedTo).toEqual(null)
-    })
+            expect(response3.status).toBe(200);
+            // expect(Object.keys(response3.body.data?.issues[0]?.assignedTo)).toContain("id")
+            expect(response3.body.data?.issues[0]?.assignedTo).toBeDefined()
+            expect(response3.body.data?.issues[0]?.assignedTo).toEqual(null)
+        })
 
-    it("fetches users", async () => {
-        const query = `{
+        it("fetches users", async () => {
+            const query = `{
             users {
                 id
             }
         }
         `
-        const response4 = await request(url).post("/").send({ query });
+            const response4 = await request(url).post("/").send({ query });
 
-        expect(response4.status).toBe(200);
-        expect(response4.body.data?.users).toBeInstanceOf(Array)
-        expect(response4.body.data?.users.length).toEqual(3)
-    })
+            expect(response4.status).toBe(200);
+            expect(response4.body.data?.users).toBeInstanceOf(Array)
+            expect(response4.body.data?.users.length).toEqual(3)
+        })
 
-    it("fetches users that one is assigned to issue", async () => {
-        const queryUsers = `{
+        it("fetches users that one is assigned to issue", async () => {
+            const queryUsers = `{
             users {
                 id
             }
         }
         `
-        const queryIssues = `{
+            const queryIssues = `{
             issues {
                 id
                 assignedTo {
@@ -120,16 +121,18 @@ describe("GraphQL issues API", () => {
                 }
             }
         }`
-        const usersResponse = await request(url).post("/").send({ query: queryUsers });
-        const issuesResponse = await request(url).post("/").send({ query: queryIssues });
+            const usersResponse = await request(url).post("/").send({ query: queryUsers });
+            const issuesResponse = await request(url).post("/").send({ query: queryIssues });
 
-        expect(usersResponse.status).toBe(200);
-        expect(issuesResponse.status).toBe(200);
+            expect(usersResponse.status).toBe(200);
+            expect(issuesResponse.status).toBe(200);
 
-        const users = usersResponse.body.data?.users.map((u:any)=> u.id)
-        const assignedUserId = issuesResponse.body.data?.issues[1].assignedTo?.id
+            const users = usersResponse.body.data?.users.map((u:any)=> u.id)
+            const assignedUserId = issuesResponse.body.data?.issues[1].assignedTo?.id
 
-        expect(users).toContain(assignedUserId)
+            expect(users).toContain(assignedUserId)
+        })
+
     })
 
     describe("Test Mutations", () => {
@@ -262,6 +265,68 @@ describe("GraphQL issues API", () => {
             expect(responseIssue.status).toBe(200)
             expect(responseIssue.body.errors[0].message).toMatch("title and description is required")
             expect(countAfter).toEqual(countBefore)
+        })
+
+        it("creates a new comment to an issue", async() => {
+
+            const issuesBefore = await request(url).post("/").send({
+                query: `{ issues { 
+                            id  
+                            comments {
+                                id 
+                            }
+                         } }`,
+            });
+
+            const users = await request(url).post("/").send({
+                query: `{ users { id } }`
+            })
+
+            const issues = await request(url).post("/").send({
+                    query: `{ issues { id } }`
+            })
+
+            const userId = users.body.data?.users[1]?.id
+            console.log(userId)
+            const issueId = issues.body.data?.issues[0]?.id
+            console.log(issueId)
+
+
+
+            const countCommentsBefore = issuesBefore.body.data?.issues[0]?.comments?.length;
+
+            const mutation = `
+                mutation AddComment($content: String!, $author: String!, $issueId: String!) {
+                  addComment(content: $content, author: $author, issueId: $issueId) {
+                    id
+                    content
+                  }
+                }
+              `;
+
+            const responseComment = await request(url).post("/").send({
+                query: mutation,
+                variables: { issueId, author: userId, content: "the issue is resolved" },
+            });
+
+            console.log("mutation response:", responseComment.body);
+
+
+            const issuesAfter = await request(url).post("/").send({
+                query: `{ issues { 
+                           id
+                           comments {
+                                id
+                           } 
+                       }}`,
+            });
+
+            const countCommentsAfter = issuesAfter.body.data?.issues[0]?.comments?.length;
+
+            expect(issuesAfter.status).toBe(200)
+            expect(responseComment.status).toBe(200)
+            expect(responseComment.body.data?.addComment?.content).toBe("the issue is resolved")
+            expect(countCommentsAfter).toBeGreaterThan(countCommentsBefore)
         })
     })
 })
